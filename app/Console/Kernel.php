@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        SetupDatabase::class,
+        Commands\SetupDatabase::class,
+        Commands\GenerateDatabaseDump::class,
     ];
 
     /**
