@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 14.4
--- Dumped by pg_dump version 15.2
+-- Dumped by pg_dump version 14.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -16,28 +16,32 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+DROP DATABASE IF EXISTS ocid_be;
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
+-- Name: ocid_be; Type: DATABASE; Schema: -; Owner: postgres
 --
 
--- *not* creating schema, since initdb creates it
+CREATE DATABASE ocid_be WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'English_Philippines.1252';
 
 
-ALTER SCHEMA public OWNER TO postgres;
+ALTER DATABASE ocid_be OWNER TO postgres;
+
+\connect ocid_be
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
-
---
--- Name: Temp; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public."Temp" (
-);
-
-
-ALTER TABLE public."Temp" OWNER TO postgres;
 
 --
 -- Name: cache; Type: TABLE; Schema: public; Owner: postgres
@@ -293,14 +297,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
--- Data for Name: Temp; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Temp"  FROM stdin;
-\.
-
-
---
 -- Data for Name: cache; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -510,14 +506,6 @@ CREATE INDEX sessions_last_activity_index ON public.sessions USING btree (last_a
 --
 
 CREATE INDEX sessions_user_id_index ON public.sessions USING btree (user_id);
-
-
---
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE USAGE ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --

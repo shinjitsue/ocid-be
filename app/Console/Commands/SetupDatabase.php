@@ -15,7 +15,7 @@ class SetupDatabase extends Command
      *
      * @var string
      */
-    protected $signature = 'db:setup {--fresh : Drop all tables before importing}';
+    protected $signature = 'db:setup {--fresh : Drop all tables before importing} {--dump : Generate dump from current database before setup}';
 
     /**
      * The console command description.
@@ -42,6 +42,10 @@ class SetupDatabase extends Command
         } else {
             $this->error("Unsupported database driver: {$connection}");
             return 1;
+        }
+
+        if ($this->option('dump')) {
+            $this->call('db:dump', ['--overwrite' => true]);
         }
 
         $this->info('Database setup completed successfully!');
