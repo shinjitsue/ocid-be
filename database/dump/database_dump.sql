@@ -70,6 +70,116 @@ CREATE TABLE public.cache_locks (
 ALTER TABLE public.cache_locks OWNER TO postgres;
 
 --
+-- Name: campuses; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.campuses (
+    id bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    address character varying(255) NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.campuses OWNER TO postgres;
+
+--
+-- Name: campuses_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.campuses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.campuses_id_seq OWNER TO postgres;
+
+--
+-- Name: campuses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.campuses_id_seq OWNED BY public.campuses.id;
+
+
+--
+-- Name: colleges; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.colleges (
+    id bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    campus_id bigint NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.colleges OWNER TO postgres;
+
+--
+-- Name: colleges_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.colleges_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.colleges_id_seq OWNER TO postgres;
+
+--
+-- Name: colleges_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.colleges_id_seq OWNED BY public.colleges.id;
+
+
+--
+-- Name: curriculum; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.curriculum (
+    id bigint NOT NULL,
+    image_url character varying(255) NOT NULL,
+    program_id bigint NOT NULL,
+    program_type character varying(255) NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone,
+    CONSTRAINT curriculum_program_type_check CHECK (((program_type)::text = ANY ((ARRAY['graduate'::character varying, 'undergrad'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.curriculum OWNER TO postgres;
+
+--
+-- Name: curriculum_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.curriculum_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.curriculum_id_seq OWNER TO postgres;
+
+--
+-- Name: curriculum_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.curriculum_id_seq OWNED BY public.curriculum.id;
+
+
+--
 -- Name: failed_jobs; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -105,6 +215,81 @@ ALTER TABLE public.failed_jobs_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.failed_jobs_id_seq OWNED BY public.failed_jobs.id;
+
+
+--
+-- Name: forms; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.forms (
+    id bigint NOT NULL,
+    form_number character varying(255) NOT NULL,
+    title character varying(255) NOT NULL,
+    purpose text NOT NULL,
+    link character varying(255) NOT NULL,
+    revision character varying(255) NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.forms OWNER TO postgres;
+
+--
+-- Name: forms_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.forms_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.forms_id_seq OWNER TO postgres;
+
+--
+-- Name: forms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.forms_id_seq OWNED BY public.forms.id;
+
+
+--
+-- Name: graduates; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.graduates (
+    id bigint NOT NULL,
+    program_name character varying(255) NOT NULL,
+    college_id bigint NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.graduates OWNER TO postgres;
+
+--
+-- Name: graduates_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.graduates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.graduates_id_seq OWNER TO postgres;
+
+--
+-- Name: graduates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.graduates_id_seq OWNED BY public.graduates.id;
 
 
 --
@@ -214,6 +399,47 @@ CREATE TABLE public.password_reset_tokens (
 ALTER TABLE public.password_reset_tokens OWNER TO postgres;
 
 --
+-- Name: personal_access_tokens; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.personal_access_tokens (
+    id bigint NOT NULL,
+    tokenable_type character varying(255) NOT NULL,
+    tokenable_id bigint NOT NULL,
+    name character varying(255) NOT NULL,
+    token character varying(64) NOT NULL,
+    abilities text,
+    last_used_at timestamp(0) without time zone,
+    expires_at timestamp(0) without time zone,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.personal_access_tokens OWNER TO postgres;
+
+--
+-- Name: personal_access_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.personal_access_tokens_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.personal_access_tokens_id_seq OWNER TO postgres;
+
+--
+-- Name: personal_access_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.personal_access_tokens_id_seq OWNED BY public.personal_access_tokens.id;
+
+
+--
 -- Name: sessions; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -228,6 +454,119 @@ CREATE TABLE public.sessions (
 
 
 ALTER TABLE public.sessions OWNER TO postgres;
+
+--
+-- Name: syllabus; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.syllabus (
+    id bigint NOT NULL,
+    image_url character varying(255) NOT NULL,
+    program_id bigint NOT NULL,
+    program_type character varying(255) NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone,
+    CONSTRAINT syllabus_program_type_check CHECK (((program_type)::text = ANY ((ARRAY['graduate'::character varying, 'undergrad'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.syllabus OWNER TO postgres;
+
+--
+-- Name: syllabus_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.syllabus_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.syllabus_id_seq OWNER TO postgres;
+
+--
+-- Name: syllabus_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.syllabus_id_seq OWNED BY public.syllabus.id;
+
+
+--
+-- Name: undergrads; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.undergrads (
+    id bigint NOT NULL,
+    program_name character varying(255) NOT NULL,
+    college_id bigint NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.undergrads OWNER TO postgres;
+
+--
+-- Name: undergrads_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.undergrads_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.undergrads_id_seq OWNER TO postgres;
+
+--
+-- Name: undergrads_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.undergrads_id_seq OWNED BY public.undergrads.id;
+
+
+--
+-- Name: user_activities; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.user_activities (
+    id bigint NOT NULL,
+    user_id bigint NOT NULL,
+    activity_type character varying(255) NOT NULL,
+    ip_address character varying(45),
+    user_agent text,
+    metadata json,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.user_activities OWNER TO postgres;
+
+--
+-- Name: user_activities_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.user_activities_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_activities_id_seq OWNER TO postgres;
+
+--
+-- Name: user_activities_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.user_activities_id_seq OWNED BY public.user_activities.id;
+
 
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: postgres
@@ -269,10 +608,45 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
+-- Name: campuses id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campuses ALTER COLUMN id SET DEFAULT nextval('public.campuses_id_seq'::regclass);
+
+
+--
+-- Name: colleges id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.colleges ALTER COLUMN id SET DEFAULT nextval('public.colleges_id_seq'::regclass);
+
+
+--
+-- Name: curriculum id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.curriculum ALTER COLUMN id SET DEFAULT nextval('public.curriculum_id_seq'::regclass);
+
+
+--
 -- Name: failed_jobs id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.failed_jobs ALTER COLUMN id SET DEFAULT nextval('public.failed_jobs_id_seq'::regclass);
+
+
+--
+-- Name: forms id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forms ALTER COLUMN id SET DEFAULT nextval('public.forms_id_seq'::regclass);
+
+
+--
+-- Name: graduates id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.graduates ALTER COLUMN id SET DEFAULT nextval('public.graduates_id_seq'::regclass);
 
 
 --
@@ -287,6 +661,34 @@ ALTER TABLE ONLY public.jobs ALTER COLUMN id SET DEFAULT nextval('public.jobs_id
 --
 
 ALTER TABLE ONLY public.migrations ALTER COLUMN id SET DEFAULT nextval('public.migrations_id_seq'::regclass);
+
+
+--
+-- Name: personal_access_tokens id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.personal_access_tokens ALTER COLUMN id SET DEFAULT nextval('public.personal_access_tokens_id_seq'::regclass);
+
+
+--
+-- Name: syllabus id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.syllabus ALTER COLUMN id SET DEFAULT nextval('public.syllabus_id_seq'::regclass);
+
+
+--
+-- Name: undergrads id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.undergrads ALTER COLUMN id SET DEFAULT nextval('public.undergrads_id_seq'::regclass);
+
+
+--
+-- Name: user_activities id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_activities ALTER COLUMN id SET DEFAULT nextval('public.user_activities_id_seq'::regclass);
 
 
 --
@@ -313,10 +715,50 @@ COPY public.cache_locks (key, owner, expiration) FROM stdin;
 
 
 --
+-- Data for Name: campuses; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.campuses (id, name, address, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: colleges; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.colleges (id, name, campus_id, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: curriculum; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.curriculum (id, image_url, program_id, program_type, created_at, updated_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: failed_jobs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.failed_jobs (id, uuid, connection, queue, payload, exception, failed_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: forms; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.forms (id, form_number, title, purpose, link, revision, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: graduates; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.graduates (id, program_name, college_id, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -344,6 +786,15 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 1	0001_01_01_000000_create_users_table	1
 2	0001_01_01_000001_create_cache_table	1
 3	0001_01_01_000002_create_jobs_table	1
+4	2025_07_07_055213_create_campuses_table	2
+5	2025_07_07_055450_create_colleges_table	2
+6	2025_07_07_055606_create_forms_table	2
+7	2025_07_07_055617_create_undergrads_table	2
+8	2025_07_07_055633_create_graduates_table	2
+9	2025_07_07_055706_create_curriculum_table	2
+10	2025_07_07_055726_create_syllabus_table	2
+11	2025_07_08_064151_create_personal_access_tokens_table	3
+12	2025_07_08_073420_create_user_activities_table	4
 \.
 
 
@@ -356,10 +807,42 @@ COPY public.password_reset_tokens (email, token, created_at) FROM stdin;
 
 
 --
+-- Data for Name: personal_access_tokens; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.personal_access_tokens (id, tokenable_type, tokenable_id, name, token, abilities, last_used_at, expires_at, created_at, updated_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: sessions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.sessions (id, user_id, ip_address, user_agent, payload, last_activity) FROM stdin;
+\.
+
+
+--
+-- Data for Name: syllabus; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.syllabus (id, image_url, program_id, program_type, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: undergrads; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.undergrads (id, program_name, college_id, created_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: user_activities; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.user_activities (id, user_id, activity_type, ip_address, user_agent, metadata, created_at, updated_at) FROM stdin;
 \.
 
 
@@ -372,10 +855,45 @@ COPY public.users (id, name, email, email_verified_at, password, remember_token,
 
 
 --
+-- Name: campuses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.campuses_id_seq', 1, false);
+
+
+--
+-- Name: colleges_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.colleges_id_seq', 1, false);
+
+
+--
+-- Name: curriculum_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.curriculum_id_seq', 1, false);
+
+
+--
 -- Name: failed_jobs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.failed_jobs_id_seq', 1, false);
+
+
+--
+-- Name: forms_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.forms_id_seq', 1, false);
+
+
+--
+-- Name: graduates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.graduates_id_seq', 1, false);
 
 
 --
@@ -389,7 +907,35 @@ SELECT pg_catalog.setval('public.jobs_id_seq', 1, false);
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 3, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 12, true);
+
+
+--
+-- Name: personal_access_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.personal_access_tokens_id_seq', 1, false);
+
+
+--
+-- Name: syllabus_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.syllabus_id_seq', 1, false);
+
+
+--
+-- Name: undergrads_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.undergrads_id_seq', 1, false);
+
+
+--
+-- Name: user_activities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.user_activities_id_seq', 1, false);
 
 
 --
@@ -416,6 +962,30 @@ ALTER TABLE ONLY public.cache
 
 
 --
+-- Name: campuses campuses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.campuses
+    ADD CONSTRAINT campuses_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: colleges colleges_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.colleges
+    ADD CONSTRAINT colleges_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: curriculum curriculum_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.curriculum
+    ADD CONSTRAINT curriculum_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: failed_jobs failed_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -429,6 +999,22 @@ ALTER TABLE ONLY public.failed_jobs
 
 ALTER TABLE ONLY public.failed_jobs
     ADD CONSTRAINT failed_jobs_uuid_unique UNIQUE (uuid);
+
+
+--
+-- Name: forms forms_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forms
+    ADD CONSTRAINT forms_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: graduates graduates_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.graduates
+    ADD CONSTRAINT graduates_pkey PRIMARY KEY (id);
 
 
 --
@@ -464,11 +1050,51 @@ ALTER TABLE ONLY public.password_reset_tokens
 
 
 --
+-- Name: personal_access_tokens personal_access_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.personal_access_tokens
+    ADD CONSTRAINT personal_access_tokens_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: personal_access_tokens personal_access_tokens_token_unique; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.personal_access_tokens
+    ADD CONSTRAINT personal_access_tokens_token_unique UNIQUE (token);
+
+
+--
 -- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.sessions
     ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: syllabus syllabus_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.syllabus
+    ADD CONSTRAINT syllabus_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: undergrads undergrads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.undergrads
+    ADD CONSTRAINT undergrads_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_activities user_activities_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_activities
+    ADD CONSTRAINT user_activities_pkey PRIMARY KEY (id);
 
 
 --
@@ -495,6 +1121,13 @@ CREATE INDEX jobs_queue_index ON public.jobs USING btree (queue);
 
 
 --
+-- Name: personal_access_tokens_tokenable_type_tokenable_id_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX personal_access_tokens_tokenable_type_tokenable_id_index ON public.personal_access_tokens USING btree (tokenable_type, tokenable_id);
+
+
+--
 -- Name: sessions_last_activity_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -506,6 +1139,52 @@ CREATE INDEX sessions_last_activity_index ON public.sessions USING btree (last_a
 --
 
 CREATE INDEX sessions_user_id_index ON public.sessions USING btree (user_id);
+
+
+--
+-- Name: user_activities_created_at_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX user_activities_created_at_index ON public.user_activities USING btree (created_at);
+
+
+--
+-- Name: user_activities_user_id_activity_type_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX user_activities_user_id_activity_type_index ON public.user_activities USING btree (user_id, activity_type);
+
+
+--
+-- Name: colleges colleges_campus_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.colleges
+    ADD CONSTRAINT colleges_campus_id_foreign FOREIGN KEY (campus_id) REFERENCES public.campuses(id);
+
+
+--
+-- Name: graduates graduates_college_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.graduates
+    ADD CONSTRAINT graduates_college_id_foreign FOREIGN KEY (college_id) REFERENCES public.colleges(id);
+
+
+--
+-- Name: undergrads undergrads_college_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.undergrads
+    ADD CONSTRAINT undergrads_college_id_foreign FOREIGN KEY (college_id) REFERENCES public.colleges(id);
+
+
+--
+-- Name: user_activities user_activities_user_id_foreign; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_activities
+    ADD CONSTRAINT user_activities_user_id_foreign FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
