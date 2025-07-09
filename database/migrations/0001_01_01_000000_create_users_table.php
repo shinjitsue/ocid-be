@@ -25,8 +25,6 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
 
-            // Add indexes for better performance
-            $table->index(['email', 'is_active']);
             $table->index('last_login_at');
         });
 
