@@ -1,7 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CampusController;
+use App\Http\Controllers\CollegeController;
+use App\Http\Controllers\GraduateController;
+use App\Http\Controllers\UndergradController;
+use App\Http\Controllers\CurriculumController;
+use App\Http\Controllers\SyllabusController;
+use App\Http\Controllers\FormController;
+use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::prefix('auth')->group(function () {
@@ -28,4 +35,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/tokens/{tokenId}', [AuthController::class, 'revokeToken']);
         Route::get('/activities', [AuthController::class, 'getUserActivities']);
     });
+
+    // Resource routes for managing data
+    Route::apiResource('campuses', CampusController::class);
+    Route::apiResource('colleges', CollegeController::class);
+    Route::apiResource('graduates', GraduateController::class);
+    Route::apiResource('undergrads', UndergradController::class);
+    Route::apiResource('curricula', CurriculumController::class);
+    Route::apiResource('syllabi', SyllabusController::class);
+    Route::apiResource('forms', FormController::class);
 });
