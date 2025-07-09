@@ -45,7 +45,7 @@ trait ApiResponseTrait
         return response()->json([
             'success' => false,
             'message' => $message,
-            'data' => null,
+            'errors' => null,
         ], $code);
     }
 }

@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
-
     use ApiResponseTrait;
 
     /**
@@ -272,7 +271,6 @@ class AuthController extends Controller
             'message' => 'If your email exists in our system, you will receive a password reset link.'
         ]);
     }
-
 
     /**
      * Get authenticated user
