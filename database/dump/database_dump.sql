@@ -578,9 +578,15 @@ CREATE TABLE public.users (
     email character varying(255) NOT NULL,
     email_verified_at timestamp(0) without time zone,
     password character varying(255) NOT NULL,
+    avatar character varying(255),
+    is_active boolean DEFAULT true NOT NULL,
+    last_login_at timestamp(0) without time zone,
+    last_login_ip character varying(45),
+    preferences json,
     remember_token character varying(100),
     created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    updated_at timestamp(0) without time zone,
+    deleted_at timestamp(0) without time zone
 );
 
 
@@ -786,15 +792,16 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 1	0001_01_01_000000_create_users_table	1
 2	0001_01_01_000001_create_cache_table	1
 3	0001_01_01_000002_create_jobs_table	1
-4	2025_07_07_055213_create_campuses_table	2
-5	2025_07_07_055450_create_colleges_table	2
-6	2025_07_07_055606_create_forms_table	2
-7	2025_07_07_055617_create_undergrads_table	2
-8	2025_07_07_055633_create_graduates_table	2
-9	2025_07_07_055706_create_curriculum_table	2
-10	2025_07_07_055726_create_syllabus_table	2
-11	2025_07_08_064151_create_personal_access_tokens_table	3
-12	2025_07_08_073420_create_user_activities_table	4
+4	2025_07_07_055213_create_campuses_table	1
+5	2025_07_07_055450_create_colleges_table	1
+6	2025_07_07_055606_create_forms_table	1
+7	2025_07_07_055617_create_undergrads_table	1
+8	2025_07_07_055633_create_graduates_table	1
+9	2025_07_07_055706_create_curriculum_table	1
+10	2025_07_07_055726_create_syllabus_table	1
+11	2025_07_08_064151_create_personal_access_tokens_table	1
+12	2025_07_08_073420_create_user_activities_table	1
+13	2025_07_09_041738_add_deleted_at_to_users_table	2
 \.
 
 
@@ -811,6 +818,8 @@ COPY public.password_reset_tokens (email, token, created_at) FROM stdin;
 --
 
 COPY public.personal_access_tokens (id, tokenable_type, tokenable_id, name, token, abilities, last_used_at, expires_at, created_at, updated_at) FROM stdin;
+4	App\\Models\\User	2	Unknown Device	520706bf9290b38d5b6b12e841b43447928197143529d89d27b73058f6cd546d	["*"]	\N	2025-07-10 05:34:00	2025-07-09 05:34:00	2025-07-09 05:34:00
+7	App\\Models\\User	3	Unknown Device	ad77dda677f626e8848cb83cf550e26ecf98d268a734acede2480e0457fea33d	["*"]	\N	2025-07-11 06:00:08	2025-07-10 06:00:08	2025-07-10 06:00:08
 \.
 
 
@@ -819,6 +828,7 @@ COPY public.personal_access_tokens (id, tokenable_type, tokenable_id, name, toke
 --
 
 COPY public.sessions (id, user_id, ip_address, user_agent, payload, last_activity) FROM stdin;
+VmWhEiPVcQPI3AVObNNmxBlis36UEXlXzQBsFpOO	\N	127.0.0.1	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0	YTozOntzOjY6Il90b2tlbiI7czo0MDoiNGMwQXBSelFtQm9GY2NKR1FHSzVNZmJ1VHNTSUpmYWFORWE5NzA3SiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=	1752030952
 \.
 
 
@@ -843,6 +853,19 @@ COPY public.undergrads (id, program_name, college_id, created_at, updated_at) FR
 --
 
 COPY public.user_activities (id, user_id, activity_type, ip_address, user_agent, metadata, created_at, updated_at) FROM stdin;
+1	2	login	127.0.0.1	PostmanRuntime/7.44.1	{"remember_me":false,"timestamp":"2025-07-09T04:36:00.987123Z"}	2025-07-09 04:36:00	2025-07-09 04:36:00
+2	2	logout	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-09T04:52:51.884184Z"}	2025-07-09 04:52:51	2025-07-09 04:52:51
+3	2	login	127.0.0.1	PostmanRuntime/7.44.1	{"remember_me":false,"timestamp":"2025-07-09T04:56:09.191573Z"}	2025-07-09 04:56:09	2025-07-09 04:56:09
+4	2	logout	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-09T05:07:21.739763Z"}	2025-07-09 05:07:21	2025-07-09 05:07:21
+5	2	login	127.0.0.1	PostmanRuntime/7.44.1	{"remember_me":false,"timestamp":"2025-07-09T05:13:45.506702Z"}	2025-07-09 05:13:45	2025-07-09 05:13:45
+6	2	password_change	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-09T05:16:40.371697Z"}	2025-07-09 05:16:40	2025-07-09 05:16:40
+7	2	logout	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-09T05:33:30.546213Z"}	2025-07-09 05:33:30	2025-07-09 05:33:30
+8	2	login	127.0.0.1	PostmanRuntime/7.44.1	{"remember_me":false,"timestamp":"2025-07-09T05:34:00.106479Z"}	2025-07-09 05:34:00	2025-07-09 05:34:00
+9	3	register	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-10T05:57:04.605647Z"}	2025-07-10 05:57:04	2025-07-10 05:57:04
+10	3	login	127.0.0.1	PostmanRuntime/7.44.1	{"remember_me":false,"timestamp":"2025-07-10T05:58:09.058515Z"}	2025-07-10 05:58:09	2025-07-10 05:58:09
+11	3	password_change	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-10T05:59:01.696802Z"}	2025-07-10 05:59:01	2025-07-10 05:59:01
+12	3	logout	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-10T05:59:27.758532Z"}	2025-07-10 05:59:27	2025-07-10 05:59:27
+13	3	login	127.0.0.1	PostmanRuntime/7.44.1	{"remember_me":false,"timestamp":"2025-07-10T06:00:08.770626Z"}	2025-07-10 06:00:08	2025-07-10 06:00:08
 \.
 
 
@@ -850,7 +873,9 @@ COPY public.user_activities (id, user_id, activity_type, ip_address, user_agent,
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at) FROM stdin;
+COPY public.users (id, name, email, email_verified_at, password, avatar, is_active, last_login_at, last_login_ip, preferences, remember_token, created_at, updated_at, deleted_at) FROM stdin;
+2	John Doe	john.doe@example.com	\N	$2y$12$LhQjpVi57pWloashwHgm3uV52CUDbDIW11uJQV3qaHJhrK9.6Edpq	\N	t	\N	\N	\N	\N	2025-07-09 04:29:08	2025-07-09 05:16:40	\N
+3	Sample Doe	sample.doe@example.com	\N	$2y$12$VZZvqouK3Os6X29BipcbfONlPig1eCvZshPJJuJRsJ8vFzKgiG6q.	\N	t	\N	\N	\N	\N	2025-07-10 05:56:39	2025-07-10 05:59:01	\N
 \.
 
 
@@ -907,14 +932,14 @@ SELECT pg_catalog.setval('public.jobs_id_seq', 1, false);
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 12, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 13, true);
 
 
 --
 -- Name: personal_access_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.personal_access_tokens_id_seq', 1, false);
+SELECT pg_catalog.setval('public.personal_access_tokens_id_seq', 7, true);
 
 
 --
@@ -935,14 +960,14 @@ SELECT pg_catalog.setval('public.undergrads_id_seq', 1, false);
 -- Name: user_activities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_activities_id_seq', 1, false);
+SELECT pg_catalog.setval('public.user_activities_id_seq', 13, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 1, false);
+SELECT pg_catalog.setval('public.users_id_seq', 3, true);
 
 
 --
@@ -1153,6 +1178,13 @@ CREATE INDEX user_activities_created_at_index ON public.user_activities USING bt
 --
 
 CREATE INDEX user_activities_user_id_activity_type_index ON public.user_activities USING btree (user_id, activity_type);
+
+
+--
+-- Name: users_last_login_at_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX users_last_login_at_index ON public.users USING btree (last_login_at);
 
 
 --
