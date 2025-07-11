@@ -63,11 +63,16 @@ class AuthController extends Controller
         // Update last login info
         $user->updateLastLogin($request->ip());
 
+        // Set user in session if using web middleware
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
+
         // Token expiration based on remember_me
         $expirationDays = $request->boolean('remember_me') ? 30 : 1;
         $deviceName = $request->input('device_name', 'Unknown Device');
 
-        // Optional: Revoke old tokens for single session
+        // Revoke old tokens for single session
         if (!$request->boolean('remember_me')) {
             $user->tokens()->delete();
         }
@@ -175,7 +180,15 @@ class AuthController extends Controller
         // Log user activity
         $this->logUserActivity($request->user(), 'logout', $request);
 
+
+        // Invalidate the token
         $request->user()->currentAccessToken()->delete();
+
+        // Also invalidate the session if it exists
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return response()->json(['message' => 'Logged out successfully']);
     }
