@@ -34,6 +34,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/tokens', [AuthController::class, 'getTokens']);
         Route::delete('/tokens/{tokenId}', [AuthController::class, 'revokeToken']);
         Route::get('/activities', [AuthController::class, 'getUserActivities']);
+        Route::get('/sessions', [AuthController::class, 'getSessions']);
+        Route::delete('/sessions/{sessionId}', [AuthController::class, 'terminateSession']);
+        Route::post('/sessions/extend', [AuthController::class, 'extendSession']);
     });
 
     // Resource routes for managing data

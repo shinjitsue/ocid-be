@@ -2,11 +2,11 @@
 
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
-    'allowed_methods' => ['*'],
-    'allowed_origins' => ['http://localhost:3000'], // React URL
+    'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS')),
     'allowed_origins_patterns' => [],
-    'allowed_headers' => ['*'],
+    'allowed_methods' => explode(',', env('CORS_ALLOWED_METHODS', '*')),
+    'allowed_headers' => explode(',', env('CORS_ALLOWED_HEADERS', '*')),
     'exposed_headers' => [],
     'max_age' => 0,
-    'supports_credentials' => true, // Cookies
+    'supports_credentials' => true,
 ];
