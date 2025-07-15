@@ -10,6 +10,11 @@ use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\FormController;
 use Illuminate\Support\Facades\Route;
 
+// CSRF Cookie endpoint for SPA authentication
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->json(['message' => 'CSRF cookie set']);
+})->middleware(['web']);
+
 // Public routes
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
@@ -34,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/tokens', [AuthController::class, 'getTokens']);
         Route::delete('/tokens/{tokenId}', [AuthController::class, 'revokeToken']);
         Route::get('/activities', [AuthController::class, 'getUserActivities']);
+        Route::get('/sessions', [AuthController::class, 'getSessions']);
+        Route::delete('/sessions/{sessionId}', [AuthController::class, 'terminateSession']);
+        Route::post('/sessions/extend', [AuthController::class, 'extendSession']);
     });
 
     // Resource routes for managing data
