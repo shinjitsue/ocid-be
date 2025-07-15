@@ -19,7 +19,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Log;
 
-
 class AuthController extends Controller
 {
     use ApiResponseTrait;
@@ -204,19 +203,6 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout from all devices
-     */
-    public function logoutAll(Request $request): JsonResponse
-    {
-        // Log user activity
-        $this->logUserActivity($request->user(), 'logout_all', $request);
-
-        $request->user()->tokens()->delete();
-
-        return response()->json(['message' => 'Logged out from all devices successfully']);
-    }
-
-    /**
      * Change password
      */
     public function changePassword(ChangePasswordRequest $request): JsonResponse
@@ -366,32 +352,4 @@ class AuthController extends Controller
             'expires_in' => $expiresAt->diffInSeconds(now()),
         ]);
     }
-
-    /**
-     * Get user's active tokens
-     */
-    public function getTokens(Request $request): JsonResponse
-    {
-        $tokens = $request->user()->tokens()->select('id', 'name', 'abilities', 'last_used_at', 'expires_at', 'created_at')->get();
-
-        return response()->json(['tokens' => $tokens]);
-    }
-
-    /**
-     * Revoke specific token
-     */
-    public function revokeToken(Request $request, $tokenId): JsonResponse
-    {
-        $user = $request->user();
-        $token = $user->tokens()->find($tokenId);
-
-        if (!$token) {
-            return response()->json(['message' => 'Token not found'], 404);
-        }
-
-        $token->delete();
-
-        return response()->json(['message' => 'Token revoked successfully']);
-    }
-
 }
