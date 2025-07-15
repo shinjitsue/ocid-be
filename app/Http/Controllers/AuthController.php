@@ -9,16 +9,15 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Traits\ApiResponseTrait;
 use App\Notifications\ResetPasswordNotification;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Log;
 
 
 class AuthController extends Controller
@@ -82,12 +81,23 @@ class AuthController extends Controller
         // Log user activity
         $this->logUserActivity($user, 'login', $request, ['remember_me' => $request->boolean('remember_me')]);
 
+        Log::info('User login attempt', [
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'remember_me' => $request->boolean('remember_me'),
+            'timestamp' => now(),
+        ]);
+
         return response()->json([
             'user' => $user->profile,
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_in' => $expirationDays * 24 * 60 * 60,
+            'expires_at' => now()->addDays($expirationDays)->toISOString(), // ADD this line
         ]);
+
+
     }
 
     /**
@@ -319,19 +329,6 @@ class AuthController extends Controller
 
 
     /**
-     * Get user activity logs
-     */
-    public function getUserActivities(Request $request): JsonResponse
-    {
-        $activities = UserActivity::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(50)
-            ->get();
-
-        return response()->json(['activities' => $activities]);
-    }
-
-    /**
      * Log user activity
      */
     protected function logUserActivity(User $user, string $activityType, Request $request, array $metadata = []): void
@@ -397,54 +394,4 @@ class AuthController extends Controller
         return response()->json(['message' => 'Token revoked successfully']);
     }
 
-    /**
-     * Get all active sessions for the user
-     */
-    public function getSessions(Request $request): JsonResponse
-    {
-        $sessions = DB::table('sessions')
-            ->where('user_id', $request->user()->id)
-            ->orderBy('last_activity', 'desc')
-            ->get(['id', 'ip_address', 'user_agent', 'last_activity']);
-
-        return response()->json([
-            'sessions' => $sessions->map(function($session) {
-                return [
-                    'id' => $session->id,
-                    'user_agent' => $session->user_agent,
-                    'ip_address' => $session->ip_address,
-                    'last_activity' => Carbon::createFromTimestamp($session->last_activity)->diffForHumans(),
-                    'is_current' => $session->id === session()->getId(),
-                ];
-            })
-        ]);
-    }
-
-    /**
-     * Terminate a specific session
-     */
-    public function terminateSession(Request $request, $sessionId): JsonResponse
-    {
-        if ($sessionId === session()->getId()) {
-            return response()->json(['message' => 'Cannot terminate current session'], 400);
-        }
-
-        DB::table('sessions')
-            ->where('id', $sessionId)
-            ->where('user_id', $request->user()->id)
-            ->delete();
-
-        return response()->json(['message' => 'Session terminated successfully']);
-    }
-
-    /**
-     * Extend session lifetime
-     */
-    public function extendSession(Request $request): JsonResponse
-    {
-        // Regenerate session with a new ID while keeping data
-        $request->session()->migrate(true);
-
-        return response()->json(['message' => 'Session extended successfully']);
-    }
 }
