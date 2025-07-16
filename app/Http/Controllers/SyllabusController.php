@@ -45,7 +45,7 @@ class SyllabusController extends Controller
         // Validate that the program exists
         $this->validateProgramExists($request->program_id, $request->program_type);
 
-        $syllabusData = $request->only(['program_id', 'program_type', 'image_url']);
+        $syllabusData = $request->only(['program_id', 'program_type']);
 
         // Handle file upload if present
         if ($request->hasFile('file')) {
@@ -80,7 +80,6 @@ class SyllabusController extends Controller
     public function update(Request $request, Syllabus $syllabus): JsonResponse
     {
         $request->validate([
-            'image_url' => 'sometimes|string|url',
             'program_id' => 'sometimes|integer',
             'program_type' => 'sometimes|in:graduate,undergrad',
             'file' => 'sometimes|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
@@ -90,7 +89,7 @@ class SyllabusController extends Controller
             $this->validateProgramExists($request->program_id, $request->program_type);
         }
 
-        $syllabusData = $request->only(['image_url', 'program_id', 'program_type']);
+        $syllabusData = $request->only([ 'program_id', 'program_type']);
 
         // Handle file upload if present
         if ($request->hasFile('file')) {
