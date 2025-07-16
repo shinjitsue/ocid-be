@@ -11,6 +11,11 @@ class Form extends Model
         'title',
         'purpose',
         'link',
-        'revision'
+        'revision',
+        'file_path',
+        'file_url',
+        'file_name',
+        'file_type',
+        'file_size'
     ];
 }

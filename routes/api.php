@@ -31,17 +31,10 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/logout-all', [AuthController::class, 'logoutAll']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/user', [AuthController::class, 'user']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::put('/change-password', [AuthController::class, 'changePassword']);
-        Route::get('/tokens', [AuthController::class, 'getTokens']);
-        Route::delete('/tokens/{tokenId}', [AuthController::class, 'revokeToken']);
-        Route::get('/activities', [AuthController::class, 'getUserActivities']);
-        Route::get('/sessions', [AuthController::class, 'getSessions']);
-        Route::delete('/sessions/{sessionId}', [AuthController::class, 'terminateSession']);
-        Route::post('/sessions/extend', [AuthController::class, 'extendSession']);
     });
 
     // Resource routes for managing data
@@ -49,7 +42,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('colleges', CollegeController::class);
     Route::apiResource('graduates', GraduateController::class);
     Route::apiResource('undergrads', UndergradController::class);
-    Route::apiResource('curricula', CurriculumController::class);
-    Route::apiResource('syllabi', SyllabusController::class);
+
+    // Curriculum routes with file operations
+    Route::apiResource('curriculum', CurriculumController::class);
+    Route::post('curriculum/{curriculum}/upload', [CurriculumController::class, 'uploadFile']);
+    Route::delete('curriculum/{curriculum}/file', [CurriculumController::class, 'removeFile']);
+
+    // Syllabus routes with file operations
+    Route::apiResource('syllabus', SyllabusController::class);
+    Route::post('syllabus/{syllabus}/upload', [SyllabusController::class, 'uploadFile']);
+    Route::delete('syllabus/{syllabus}/file', [SyllabusController::class, 'removeFile']);
+
+    // Form routes with file operations
     Route::apiResource('forms', FormController::class);
+    Route::post('forms/{form}/upload', [FormController::class, 'uploadFile']);
+    Route::delete('forms/{form}/file', [FormController::class, 'removeFile']);
 });

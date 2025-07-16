@@ -16,9 +16,15 @@ return new class extends Migration
             $table->string('form_number');
             $table->string('title');
             $table->text('purpose');
-            $table->string('link');
-            $table->string('revision');
+            $table->string('link')->nullable();
+            $table->string('revision')->nullable();
+            $table->string('file_path')->nullable();
+            $table->string('file_url')->nullable();
+            $table->string('file_name')->nullable();
+            $table->string('file_type')->nullable();
+            $table->bigInteger('file_size')->nullable();
             $table->timestamps();
+
         });
     }
 
