@@ -13,9 +13,13 @@ return new class extends Migration
     {
         Schema::create('curriculum', function (Blueprint $table) {
             $table->id();
-            $table->string('image_url');
             $table->unsignedBigInteger('program_id');
             $table->enum('program_type', ['graduate', 'undergrad']);
+            $table->string('file_path')->nullable();
+            $table->string('file_url')->nullable();
+            $table->string('file_name')->nullable();
+            $table->string('file_type')->nullable();
+            $table->bigInteger('file_size')->nullable();
             $table->timestamps();
         });
     }

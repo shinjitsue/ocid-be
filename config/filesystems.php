@@ -29,7 +29,6 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
@@ -40,6 +39,30 @@ return [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        'forms' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/forms'),
+            'url' => env('APP_URL').'/storage/forms',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        'curriculum' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/curriculum'),
+            'url' => env('APP_URL').'/storage/curriculum',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
+        'syllabus' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/syllabus'),
+            'url' => env('APP_URL').'/storage/syllabus',
             'visibility' => 'public',
             'throw' => false,
         ],
@@ -55,7 +78,6 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
-
     ],
 
     /*
