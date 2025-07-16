@@ -8,9 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Curriculum extends Model
 {
     protected $fillable = [
-        'image_url',
         'program_id',
-        'program_type'
+        'program_type',
+        'file_path',
+        'file_url',
+        'file_name',
+        'file_type',
+        'file_size'
     ];
 
     public function graduateProgram(): BelongsTo
