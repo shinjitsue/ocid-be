@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -60,11 +61,16 @@ class AuthController extends Controller
         // Update last login info
         $user->updateLastLogin($request->ip());
 
+        // Set user in session if using web middleware
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
+
         // Token expiration based on remember_me
         $expirationDays = $request->boolean('remember_me') ? 30 : 1;
         $deviceName = $request->input('device_name', 'Unknown Device');
 
-        // Optional: Revoke old tokens for single session
+        // Revoke old tokens for single session
         if (!$request->boolean('remember_me')) {
             $user->tokens()->delete();
         }
@@ -74,12 +80,23 @@ class AuthController extends Controller
         // Log user activity
         $this->logUserActivity($user, 'login', $request, ['remember_me' => $request->boolean('remember_me')]);
 
+        Log::info('User login attempt', [
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'remember_me' => $request->boolean('remember_me'),
+            'timestamp' => now(),
+        ]);
+
         return response()->json([
             'user' => $user->profile,
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_in' => $expirationDays * 24 * 60 * 60,
+            'expires_at' => now()->addDays($expirationDays)->toISOString(), // ADD this line
         ]);
+
+
     }
 
     /**
@@ -172,22 +189,17 @@ class AuthController extends Controller
         // Log user activity
         $this->logUserActivity($request->user(), 'logout', $request);
 
+
+        // Invalidate the token
         $request->user()->currentAccessToken()->delete();
 
+        // Also invalidate the session if it exists
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
         return response()->json(['message' => 'Logged out successfully']);
-    }
-
-    /**
-     * Logout from all devices
-     */
-    public function logoutAll(Request $request): JsonResponse
-    {
-        // Log user activity
-        $this->logUserActivity($request->user(), 'logout_all', $request);
-
-        $request->user()->tokens()->delete();
-
-        return response()->json(['message' => 'Logged out from all devices successfully']);
     }
 
     /**
@@ -301,6 +313,23 @@ class AuthController extends Controller
         ]);
     }
 
+
+    /**
+     * Log user activity
+     */
+    protected function logUserActivity(User $user, string $activityType, Request $request, array $metadata = []): void
+    {
+        UserActivity::create([
+            'user_id' => $user->id,
+            'activity_type' => $activityType,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'metadata' => array_merge($metadata, [
+                'timestamp' => now()->toISOString(),
+            ]),
+        ]);
+    }
+
     /**
      * Refresh token
      */
@@ -321,62 +350,6 @@ class AuthController extends Controller
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_in' => $expiresAt->diffInSeconds(now()),
-        ]);
-    }
-
-    /**
-     * Get user's active tokens
-     */
-    public function getTokens(Request $request): JsonResponse
-    {
-        $tokens = $request->user()->tokens()->select('id', 'name', 'abilities', 'last_used_at', 'expires_at', 'created_at')->get();
-
-        return response()->json(['tokens' => $tokens]);
-    }
-
-    /**
-     * Revoke specific token
-     */
-    public function revokeToken(Request $request, $tokenId): JsonResponse
-    {
-        $user = $request->user();
-        $token = $user->tokens()->find($tokenId);
-
-        if (!$token) {
-            return response()->json(['message' => 'Token not found'], 404);
-        }
-
-        $token->delete();
-
-        return response()->json(['message' => 'Token revoked successfully']);
-    }
-
-    /**
-     * Get user activity logs
-     */
-    public function getUserActivities(Request $request): JsonResponse
-    {
-        $activities = UserActivity::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(50)
-            ->get();
-
-        return response()->json(['activities' => $activities]);
-    }
-
-    /**
-     * Log user activity
-     */
-    protected function logUserActivity(User $user, string $activityType, Request $request, array $metadata = []): void
-    {
-        UserActivity::create([
-            'user_id' => $user->id,
-            'activity_type' => $activityType,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'metadata' => array_merge($metadata, [
-                'timestamp' => now()->toISOString(),
-            ]),
         ]);
     }
 }
