@@ -4,10 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Validation\ValidationException;
+use App\Http\Traits\RecaptchaTrait;
 
 class LoginRequest extends FormRequest
 {
+        use RecaptchaTrait;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -43,17 +45,15 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    // Validation for reCAPTCHA
+    /**
+     * Enhanced reCAPTCHA validation
+     */
     protected function passedValidation(): void
     {
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret' => config('services.recaptcha.secret'),
-            'response' => $this->input('recaptcha_token'),
-            'remoteip' => $this->ip(),
-        ]);
-
-        if (!($response->json('success') ?? false)) {
-            abort(422, 'reCAPTCHA verification failed.');
-        }
+        $this->validateRecaptcha(
+            $this->input('recaptcha_token'),
+            $this->ip()
+        );
     }
+
 }
