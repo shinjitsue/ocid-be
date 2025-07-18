@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Curriculum extends Model
 {
+    protected $table = 'curriculum';
+
     protected $fillable = [
         'program_id',
         'program_type',

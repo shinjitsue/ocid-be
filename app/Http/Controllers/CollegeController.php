@@ -26,10 +26,11 @@ class CollegeController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:colleges',
             'campus_id' => 'required|exists:campuses,id',
         ]);
 
-        $college = College::create($request->only(['name', 'campus_id']));
+        $college = College::create($request->only(['name', 'acronym', 'campus_id']));
         $college->load('campus');
         return $this->successResponse($college, 'College created successfully', 201);
     }
@@ -50,10 +51,11 @@ class CollegeController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:colleges,acronym,' . $college->id,
             'campus_id' => 'sometimes|exists:campuses,id',
         ]);
 
-        $college->update($request->only(['name', 'campus_id']));
+        $college->update($request->only(['name', 'acronym', 'campus_id']));
         $college->load('campus');
         return $this->successResponse($college, 'College updated successfully');
     }

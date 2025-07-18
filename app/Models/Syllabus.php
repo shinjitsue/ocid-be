@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Syllabus extends Model
 {
+    protected $table = 'syllabus';
+
     protected $fillable = [
         'program_id',
         'program_type',

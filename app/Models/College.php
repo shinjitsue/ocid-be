@@ -10,6 +10,7 @@ class College extends Model
 {
     protected $fillable = [
         'name',
+        'acronym',
         'campus_id'
     ];
 

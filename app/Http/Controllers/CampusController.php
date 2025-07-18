@@ -26,10 +26,11 @@ class CampusController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:campuses',
             'address' => 'required|string|max:500',
         ]);
 
-        $campus = Campus::create($request->only(['name', 'address']));
+        $campus = Campus::create($request->only(['name', 'acronym', 'address']));
         return $this->successResponse($campus, 'Campus created successfully', 201);
     }
     /**
@@ -48,10 +49,11 @@ class CampusController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:campuses,acronym,' . $campus->id,
             'address' => 'sometimes|string|max:500',
         ]);
 
-        $campus->update($request->only(['name', 'address']));
+        $campus->update($request->only(['name', 'acronym', 'address']));
         return $this->successResponse($campus, 'Campus updated successfully');
     }
 

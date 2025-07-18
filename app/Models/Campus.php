@@ -9,6 +9,7 @@ class Campus extends Model
 {
     protected $fillable = [
         'name',
+        'acronym',
         'address'
     ];
 
