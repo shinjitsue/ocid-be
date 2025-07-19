@@ -49,7 +49,7 @@ class CampusController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|string|max:255',
-            'acronym' => 'sometimes|string|max:10|unique:campuses,acronym,' . $campus->id,
+            'acronym' => 'sometimes|string|max:10|unique:campuses,acronym,' . $campus->getKey(),
             'address' => 'sometimes|string|max:500',
         ]);
 

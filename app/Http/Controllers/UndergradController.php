@@ -28,10 +28,11 @@ class UndergradController extends Controller
     {
         $request->validate([
             'program_name' => 'required|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:undergrads',
             'college_id' => 'required|exists:colleges,id',
         ]);
 
-        $undergrad = Undergrad::create($request->only(['program_name', 'college_id']));
+        $undergrad = Undergrad::create($request->only(['program_name', 'acronym', 'college_id']));
         $undergrad->load('college.campus');
         return $this->successResponse($undergrad, 'Undergraduate program created successfully', 201);
     }
@@ -52,10 +53,11 @@ class UndergradController extends Controller
     {
         $request->validate([
             'program_name' => 'sometimes|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:undergrads,acronym,' . $undergrad->id,
             'college_id' => 'sometimes|exists:colleges,id',
         ]);
 
-        $undergrad->update($request->only(['program_name', 'college_id']));
+        $undergrad->update($request->only(['program_name', 'acronym', 'college_id']));
         $undergrad->load('college.campus');
         return $this->successResponse($undergrad, 'Undergraduate program updated successfully');
     }
