@@ -38,6 +38,15 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * The attributes that should be appended to the model.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'active_tokens_count',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -81,18 +90,26 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Accessor for avatar attribute to provide a default value.
+     */
+    public function getAvatarAttribute($value)
+    {
+        return $value ?? 'default.png';
+    }
+
+    /**
      * Get user's full profile information
      */
     public function getProfileAttribute(): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->getKey(),
             'name' => $this->name,
             'email' => $this->email,
-            'avatar' => $this->avatar,
+            'avatar' => $this->getAttribute('avatar'),
             'email_verified_at' => $this->email_verified_at,
             'last_login_at' => $this->last_login_at,
-            'active_tokens_count' => $this->active_tokens_count,
+            'active_tokens_count' => $this->getAttribute('active_tokens_count'),
             'is_active' => $this->is_active,
             'preferences' => $this->preferences ?? [],
         ];

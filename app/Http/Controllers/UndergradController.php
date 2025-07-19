@@ -53,7 +53,7 @@ class UndergradController extends Controller
     {
         $request->validate([
             'program_name' => 'sometimes|string|max:255',
-            'acronym' => 'sometimes|string|max:10|unique:undergrads,acronym,' . $undergrad->id,
+            'acronym' => 'sometimes|string|max:10|unique:undergrads,acronym,' . $undergrad->getKey(),
             'college_id' => 'sometimes|exists:colleges,id',
         ]);
 

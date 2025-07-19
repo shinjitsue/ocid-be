@@ -38,9 +38,9 @@ class AuthController extends Controller
             ]);
         }
 
-        $user = User::active()->where('email', $request->email)->first();
+        $user = User::active()->where('email', $request->input('email'))->first();
 
-        if (!$user || !Hash::check($request->password, $user->getAuthPassword())) {
+        if (!$user || !Hash::check($request->input('password'), $user->getAuthPassword())) {
             RateLimiter::hit($key, 60);
 
             throw ValidationException::withMessages([
@@ -81,7 +81,7 @@ class AuthController extends Controller
         $this->logUserActivity($user, 'login', $request, ['remember_me' => $request->boolean('remember_me')]);
 
         Log::info('User login attempt', [
-            'user_id' => $user->id,
+            'user_id' => $user->getKey(),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'remember_me' => $request->boolean('remember_me'),
@@ -89,11 +89,11 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'user' => $user->profile,
+            'user' => $user,
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_in' => $expirationDays * 24 * 60 * 60,
-            'expires_at' => now()->addDays($expirationDays)->toISOString(), // ADD this line
+            'expires_at' => now()->addDays($expirationDays)->toISOString(),
         ]);
 
 
@@ -105,9 +105,9 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
         ]);
 
         // Fire registered event for email verification
@@ -120,7 +120,7 @@ class AuthController extends Controller
         $this->logUserActivity($user, 'register', $request);
 
         return response()->json([
-            'user' => $user->profile,
+            'user' => $user,
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_in' => 30 * 24 * 60 * 60,
@@ -138,9 +138,9 @@ class AuthController extends Controller
             'hash' => 'required|string',
         ]);
 
-        $user = User::findOrFail($request->id);
+        $user = User::findOrFail($request->input('id'));
 
-        if (!hash_equals(sha1($user->getEmailForVerification()), $request->hash)) {
+        if (!hash_equals(sha1($user->getEmailForVerification()), $request->input('hash'))) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid verification link.'],
             ]);
@@ -162,7 +162,7 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->input('email'))->first();
 
         if (!$user) {
             return response()->json([
@@ -209,14 +209,14 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if (!Hash::check($request->current_password, $user->getAuthPassword())) {
+        if (!Hash::check($request->input('current_password'), $user->getAuthPassword())) {
             throw ValidationException::withMessages([
                 'current_password' => ['The current password is incorrect.'],
             ]);
         }
 
         $user->update([
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($request->input('password')),
         ]);
 
         // Optionally logout from all other devices
@@ -267,7 +267,7 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->input('email'))->first();
 
         if (!$user) {
             // Don't reveal if email exists
@@ -290,7 +290,7 @@ class AuthController extends Controller
     public function user(Request $request): JsonResponse
     {
         return response()->json([
-            'user' => $request->user()->profile,
+            'user' => $request->user(),
         ]);
     }
 
@@ -308,7 +308,7 @@ class AuthController extends Controller
         $user->update($request->only(['name', 'preferences']));
 
         return response()->json([
-            'user' => $user->fresh()->profile,
+            'user' => $user->fresh(),
             'message' => 'Profile updated successfully',
         ]);
     }
@@ -319,7 +319,7 @@ class AuthController extends Controller
     protected function logUserActivity(User $user, string $activityType, Request $request, array $metadata = []): void
     {
         UserActivity::create([
-            'user_id' => $user->id,
+            'user_id' => $user->getKey(),
             'activity_type' => $activityType,
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
