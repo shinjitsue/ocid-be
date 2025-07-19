@@ -10,6 +10,7 @@ class Graduate extends Model
 {
     protected $fillable = [
         'program_name',
+        'acronym',
         'college_id'
     ];
 

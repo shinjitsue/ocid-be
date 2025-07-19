@@ -11,8 +11,15 @@ class College extends Model
     protected $fillable = [
         'name',
         'acronym',
-        'campus_id'
+        'campus_id',
+        'logo_path',
+        'logo_url',
+        'logo_name',
+        'logo_type',
+        'logo_size'
     ];
+
+    protected $appends = ['logo'];
 
     public function campus(): BelongsTo
     {
@@ -27,5 +34,29 @@ class College extends Model
     public function graduates(): HasMany
     {
         return $this->hasMany(Graduate::class);
+    }
+
+    /**
+     * Get the logo URL or return null if no logo uploaded
+     */
+    public function getLogoAttribute(): ?string
+    {
+        return $this->logo_url;
+    }
+
+    /**
+     * Check if college has a custom uploaded logo
+     */
+    public function hasCustomLogo(): bool
+    {
+        return !empty($this->logo_url);
+    }
+
+    /**
+     * Get logo or default placeholder
+     */
+    public function getLogoOrDefault(): string
+    {
+        return $this->logo_url ?? '/images/default-college-logo.png';
     }
 }
