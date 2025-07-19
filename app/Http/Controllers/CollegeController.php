@@ -78,7 +78,7 @@ class CollegeController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|string|max:255',
-            'acronym' => 'sometimes|string|max:10|unique:colleges,acronym,' . $college->id,
+            'acronym' => 'sometimes|string|max:10|unique:colleges,acronym,' . $college->getKey(),
             'campus_id' => 'sometimes|exists:campuses,id',
             'logo' => 'sometimes|file|max:5120|mimes:jpg,jpeg,png,gif,svg',
         ]);
@@ -88,8 +88,8 @@ class CollegeController extends Controller
         // Handle logo upload if present
         if ($request->hasFile('logo')) {
             // Delete old logo if exists
-            if ($college->logo_path) {
-                $this->fileService->deleteFile($college->logo_path, 'logos/colleges');
+            if ($college->getAttribute('logo_path')) {
+                $this->fileService->deleteFile($college->getAttribute('logo_path'), 'logos/colleges');
             }
 
             $fileInfo = $this->fileService->uploadFile(
@@ -116,8 +116,8 @@ class CollegeController extends Controller
     public function destroy(College $college): JsonResponse
     {
         // Delete associated logo if exists
-        if ($college->logo_path) {
-            $this->fileService->deleteFile($college->logo_path, 'logos/colleges');
+        if ($college->getAttribute('logo_path')) {
+            $this->fileService->deleteFile($college->getAttribute('logo_path'), 'logos/colleges');
         }
 
         $college->delete();
@@ -134,8 +134,8 @@ class CollegeController extends Controller
         ]);
 
         // Delete old logo if exists
-        if ($college->logo_path) {
-            $this->fileService->deleteFile($college->logo_path, 'logos/colleges');
+        if ($college->getAttribute('logo_path')) {
+            $this->fileService->deleteFile($college->getAttribute('logo_path'), 'logos/colleges');
         }
 
         $fileInfo = $this->fileService->uploadFile(
@@ -159,11 +159,11 @@ class CollegeController extends Controller
      */
     public function removeLogo(College $college): JsonResponse
     {
-        if (!$college->logo_path) {
+        if (!$college->getAttribute('logo_path')) {
             return $this->errorResponse('No logo attached to this college', 400);
         }
 
-        $this->fileService->deleteFile($college->logo_path, 'logos/colleges');
+        $this->fileService->deleteFile($college->getAttribute('logo_path'), 'logos/colleges');
 
         $college->update([
             'logo_path' => null,

@@ -41,7 +41,7 @@ class College extends Model
      */
     public function getLogoAttribute(): ?string
     {
-        return $this->logo_url;
+        return $this->getAttribute('logo_url');
     }
 
     /**

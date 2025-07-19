@@ -77,7 +77,7 @@ class FormController extends Controller
     public function update(Request $request, Form $form): JsonResponse
     {
         $request->validate([
-            'form_number' => 'sometimes|string|max:255|unique:forms,form_number,' . $form->id,
+            'form_number' => 'sometimes|string|max:255|unique:forms,form_number,' . $form->getKey(),
             'title' => 'sometimes|string|max:255',
             'purpose' => 'sometimes|string',
             'link' => 'sometimes|string|url',
@@ -90,8 +90,8 @@ class FormController extends Controller
         // Handle file upload if present
         if ($request->hasFile('file')) {
             // Delete old file if exists
-            if ($form->file_path) {
-                $this->fileService->deleteFile($form->file_path, 'forms');
+            if ($form->getAttribute('file_path')) {
+                $this->fileService->deleteFile($form->getAttribute('file_path'), 'forms');
             }
 
             $fileInfo = $this->fileService->uploadFile(
@@ -116,8 +116,8 @@ class FormController extends Controller
     public function destroy(Form $form): JsonResponse
     {
         // Delete associated file if exists
-        if ($form->file_path) {
-            $this->fileService->deleteFile($form->file_path, 'forms');
+        if ($form->getAttribute('file_path')) {
+            $this->fileService->deleteFile($form->getAttribute('file_path'), 'forms');
         }
 
         $form->delete();
@@ -130,8 +130,8 @@ class FormController extends Controller
     public function uploadFile(FileUploadRequest $request, Form $form): JsonResponse
     {
         // Delete old file if exists
-        if ($form->file_path) {
-            $this->fileService->deleteFile($form->file_path, 'forms');
+        if ($form->getAttribute('file_path')) {
+            $this->fileService->deleteFile($form->getAttribute('file_path'), 'forms');
         }
 
         $fileInfo = $this->fileService->uploadFile(
@@ -155,11 +155,11 @@ class FormController extends Controller
      */
     public function removeFile(Form $form): JsonResponse
     {
-        if (!$form->file_path) {
+        if (!$form->getAttribute('file_path')) {
             return $this->errorResponse('No file attached to this form', 400);
         }
 
-        $this->fileService->deleteFile($form->file_path, 'forms');
+        $this->fileService->deleteFile($form->getAttribute('file_path'), 'forms');
 
         $form->update([
             'file_path' => null,

@@ -53,7 +53,7 @@ class GraduateController extends Controller
     {
         $request->validate([
             'program_name' => 'sometimes|string|max:255',
-            'acronym' => 'sometimes|string|max:10|unique:graduates,acronym,' . $graduate->id,
+            'acronym' => 'sometimes|string|max:10|unique:graduates,acronym,' . $graduate->getKey(),
             'college_id' => 'sometimes|exists:colleges,id',
         ]);
 
