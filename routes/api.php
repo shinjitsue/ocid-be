@@ -8,6 +8,7 @@ use App\Http\Controllers\UndergradController;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
 
 // CSRF Cookie endpoint for SPA authentication
@@ -61,4 +62,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('forms', FormController::class);
     Route::post('forms/{form}/upload', [FormController::class, 'uploadFile']);
     Route::delete('forms/{form}/file', [FormController::class, 'removeFile']);
+
+    Route::middleware('auth:sanctum')->get('/user/profile', [UserController::class, 'show']);
 });
