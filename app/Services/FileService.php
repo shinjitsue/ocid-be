@@ -14,7 +14,7 @@ class FileService
      * @param UploadedFile $file The uploaded file
      * @param string $disk Storage disk to use
      * @param string|null $folder Optional subfolder
-     * @param string|null $filename Optional custom filename
+     * @param string|null $filename Optional cust   om filename
      * @return array File information including path and url
      */
     public function uploadFile(UploadedFile $file, string $disk, ?string $folder = null, ?string $filename = null): array
