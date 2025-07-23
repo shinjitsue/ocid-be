@@ -1,14 +1,22 @@
 {
-    "name": "laravel/laravel",
+    "name": "carsu-ocid/ocid-backend",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "A backend system for OCID, built with Laravel. This project is designed to handle various functionalities including user management, data processing, and integration with external services.",
+    "keywords": [
+        "laravel",
+        "framework",
+        "backend",
+        "ocid",
+        "api",
+        "education"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.1",
-        "laravel/tinker": "^2.9"
+        "laravel/tinker": "^2.9",
+        "league/flysystem-aws-s3-v3": "^3.29"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

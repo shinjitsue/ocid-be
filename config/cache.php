@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => env('CACHE_STORE', 'redis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -87,6 +87,12 @@ return [
 
         'octane' => [
             'driver' => 'octane',
+        ],
+
+        'multi_tier' => [
+            'driver' => 'redis',
+            'connection' => 'cache',
+            'prefix' => env('CACHE_PREFIX', 'ocid_cache'),
         ],
 
     ],
