@@ -9,6 +9,7 @@ use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\SyllabusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\FaqController;
 use Illuminate\Support\Facades\Route;
 
 // CSRF Cookie endpoint for SPA authentication
@@ -26,6 +27,13 @@ Route::prefix('auth')->group(function () {
     Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
         ->middleware(['signed'])
         ->name('verification.verify');
+    
+});
+
+// FAQ routes
+Route::prefix('faqs')->controller(FaqController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/chat', 'chat');
 });
 
 // Protected routes
