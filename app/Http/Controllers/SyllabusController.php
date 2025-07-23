@@ -43,7 +43,7 @@ class SyllabusController extends Controller
         ]);
 
         // Validate that the program exists
-        $this->validateProgramExists($request->program_id, $request->program_type);
+        $this->validateProgramExists($request->input('program_id'), $request->input('program_type'));
 
         $syllabusData = $request->only(['program_id', 'program_type']);
 
@@ -86,7 +86,7 @@ class SyllabusController extends Controller
         ]);
 
         if ($request->has(['program_id', 'program_type'])) {
-            $this->validateProgramExists($request->program_id, $request->program_type);
+            $this->validateProgramExists($request->input('program_id'), $request->input('program_type'));
         }
 
         $syllabusData = $request->only([ 'program_id', 'program_type']);
@@ -94,8 +94,8 @@ class SyllabusController extends Controller
         // Handle file upload if present
         if ($request->hasFile('file')) {
             // Delete old file if exists
-            if ($syllabus->file_path) {
-                $this->fileService->deleteFile($syllabus->file_path, 'syllabus');
+            if ($syllabus->getAttribute('file_path')) {
+                $this->fileService->deleteFile($syllabus->getAttribute('file_path'), 'syllabus');
             }
 
             $fileInfo = $this->fileService->uploadFile(
@@ -120,8 +120,8 @@ class SyllabusController extends Controller
     public function destroy(Syllabus $syllabus): JsonResponse
     {
         // Delete associated file if exists
-        if ($syllabus->file_path) {
-            $this->fileService->deleteFile($syllabus->file_path, 'syllabus');
+        if ($syllabus->getAttribute('file_path')) {
+            $this->fileService->deleteFile($syllabus->getAttribute('file_path'), 'syllabus');
         }
 
         $syllabus->delete();
@@ -134,8 +134,8 @@ class SyllabusController extends Controller
     public function uploadFile(FileUploadRequest $request, Syllabus $syllabus): JsonResponse
     {
         // Delete old file if exists
-        if ($syllabus->file_path) {
-            $this->fileService->deleteFile($syllabus->file_path, 'syllabus');
+        if ($syllabus->getAttribute('file_path')) {
+            $this->fileService->deleteFile($syllabus->getAttribute('file_path'), 'syllabus');
         }
 
         $fileInfo = $this->fileService->uploadFile(
@@ -159,11 +159,11 @@ class SyllabusController extends Controller
      */
     public function removeFile(Syllabus $syllabus): JsonResponse
     {
-        if (!$syllabus->file_path) {
+        if (!$syllabus->getAttribute('file_path')) {
             return $this->errorResponse('No file attached to this syllabus', 400);
         }
 
-        $this->fileService->deleteFile($syllabus->file_path, 'syllabus');
+        $this->fileService->deleteFile($syllabus->getAttribute('file_path'), 'syllabus');
 
         $syllabus->update([
             'file_path' => null,

@@ -31,8 +31,13 @@ class FileService
         // Store the file on the specified disk
         $storedPath = $file->storeAs('', $path, $disk);
 
-        // Get the URL
-        $url = Storage::disk($disk)->url($storedPath);
+        // Get the URL using method if available, otherwise build manually
+        $storage = Storage::disk($disk);
+        if (method_exists($storage, 'url')) {
+            $url = $storage->url($storedPath);
+        } else {
+            $url = config('app.url') . '/storage/' . $storedPath;
+        }
 
         return [
             'path' => $storedPath,

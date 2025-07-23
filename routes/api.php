@@ -47,9 +47,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Resource routes for managing data
     Route::apiResource('campuses', CampusController::class);
-    Route::apiResource('colleges', CollegeController::class);
     Route::apiResource('graduates', GraduateController::class);
     Route::apiResource('undergrads', UndergradController::class);
+
+    // College routes with file operations
+    Route::apiResource('colleges', CollegeController::class);
+    Route::post('colleges/{college}/upload-logo', [CollegeController::class, 'uploadLogo']);
+    Route::delete('colleges/{college}/logo', [CollegeController::class, 'removeLogo']);
 
     // Curriculum routes with file operations
     Route::apiResource('curriculum', CurriculumController::class);

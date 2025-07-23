@@ -28,10 +28,11 @@ class GraduateController extends Controller
     {
         $request->validate([
             'program_name' => 'required|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:graduates',
             'college_id' => 'required|exists:colleges,id',
         ]);
 
-        $graduate = Graduate::create($request->only(['program_name', 'college_id']));
+        $graduate = Graduate::create($request->only(['program_name', 'acronym', 'college_id']));
         $graduate->load('college.campus');
         return $this->successResponse($graduate, 'Graduate program created successfully', 201);
     }
@@ -52,10 +53,11 @@ class GraduateController extends Controller
     {
         $request->validate([
             'program_name' => 'sometimes|string|max:255',
+            'acronym' => 'sometimes|string|max:10|unique:graduates,acronym,' . $graduate->getKey(),
             'college_id' => 'sometimes|exists:colleges,id',
         ]);
 
-        $graduate->update($request->only(['program_name', 'college_id']));
+        $graduate->update($request->only(['program_name', 'acronym', 'college_id']));
         $graduate->load('college.campus');
         return $this->successResponse($graduate, 'Graduate program updated successfully');
     }

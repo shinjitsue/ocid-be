@@ -42,7 +42,7 @@ class CurriculumController extends Controller
             'file' => 'sometimes|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
 
-        $this->validateProgramExists($request->program_id, $request->program_type);
+        $this->validateProgramExists($request->input('program_id'), $request->input('program_type'));
 
         $curriculumData = $request->only(['program_id', 'program_type']);
 
@@ -85,7 +85,7 @@ class CurriculumController extends Controller
         ]);
 
         if ($request->has(['program_id', 'program_type'])) {
-            $this->validateProgramExists($request->program_id, $request->program_type);
+            $this->validateProgramExists($request->input('program_id'), $request->input('program_type'));
         }
 
         $curriculumData = $request->only([ 'program_id', 'program_type']);
@@ -93,8 +93,8 @@ class CurriculumController extends Controller
         // Handle file upload if present
         if ($request->hasFile('file')) {
             // Delete old file if exists
-            if ($curriculum->file_path) {
-                $this->fileService->deleteFile($curriculum->file_path, 'curriculum');
+            if ($curriculum->getAttribute('file_path')) {
+                $this->fileService->deleteFile($curriculum->getAttribute('file_path'), 'curriculum');
             }
 
             $fileInfo = $this->fileService->uploadFile(
@@ -119,8 +119,8 @@ class CurriculumController extends Controller
     public function destroy(Curriculum $curriculum): JsonResponse
     {
         // Delete associated file if exists
-        if ($curriculum->file_path) {
-            $this->fileService->deleteFile($curriculum->file_path, 'curriculum');
+        if ($curriculum->getAttribute('file_path')) {
+            $this->fileService->deleteFile($curriculum->getAttribute('file_path'), 'curriculum');
         }
 
         $curriculum->delete();
@@ -133,8 +133,8 @@ class CurriculumController extends Controller
     public function uploadFile(FileUploadRequest $request, Curriculum $curriculum): JsonResponse
     {
         // Delete old file if exists
-        if ($curriculum->file_path) {
-            $this->fileService->deleteFile($curriculum->file_path, 'curriculum');
+        if ($curriculum->getAttribute('file_path')) {
+            $this->fileService->deleteFile($curriculum->getAttribute('file_path'), 'curriculum');
         }
 
         $fileInfo = $this->fileService->uploadFile(
@@ -158,11 +158,11 @@ class CurriculumController extends Controller
      */
     public function removeFile(Curriculum $curriculum): JsonResponse
     {
-        if (!$curriculum->file_path) {
+        if (!$curriculum->getAttribute('file_path')) {
             return $this->errorResponse('No file attached to this curriculum', 400);
         }
 
-        $this->fileService->deleteFile($curriculum->file_path, 'curriculum');
+        $this->fileService->deleteFile($curriculum->getAttribute('file_path'), 'curriculum');
 
         $curriculum->update([
             'file_path' => null,

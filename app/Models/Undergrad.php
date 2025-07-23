@@ -10,6 +10,7 @@ class Undergrad extends Model
 {
     protected $fillable = [
         'program_name',
+        'acronym',
         'college_id'
     ];
 
@@ -18,15 +19,16 @@ class Undergrad extends Model
         return $this->belongsTo(College::class);
     }
 
-    public function curriculum(): HasOne
+    public function curriculum()
     {
         return $this->hasOne(Curriculum::class, 'program_id')
             ->where('program_type', 'undergrad');
     }
 
-    public function syllabus(): HasOne
+    public function syllabus()
     {
-        return $this->hasOne(Syllabus::class, 'program_id')
-            ->where('program_type', 'undergrad');
+        $syllabusRelation = $this->hasOne(Syllabus::class, 'program_id');
+        $syllabusRelation->getQuery()->where('program_type', 'undergrad');
+        return $syllabusRelation;
     }
 }

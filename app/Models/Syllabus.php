@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Syllabus extends Model
 {
+    protected $table = 'syllabus';
+
     protected $fillable = [
         'program_id',
         'program_type',
@@ -21,12 +23,12 @@ class Syllabus extends Model
     public function graduateProgram(): BelongsTo
     {
         return $this->belongsTo(Graduate::class, 'program_id')
-            ->when($this->program_type === 'graduate');
+            ->when($this->getAttribute('program_type') === 'graduate');
     }
 
     public function undergradProgram(): BelongsTo
     {
         return $this->belongsTo(Undergrad::class, 'program_id')
-            ->when($this->program_type === 'undergrad');
+            ->when($this->getAttribute('program_type') === 'undergrad');
     }
 }
