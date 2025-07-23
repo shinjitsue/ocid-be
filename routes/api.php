@@ -7,6 +7,7 @@ use App\Http\Controllers\GraduateController;
 use App\Http\Controllers\UndergradController;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\SyllabusController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\FaqController;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::put('/change-password', [AuthController::class, 'changePassword']);
+    });
+
+    // Dashboard routes
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'index']);
+        Route::post('/clear-cache', [DashboardController::class, 'clearCache']);
     });
 
     // Resource routes for managing data
