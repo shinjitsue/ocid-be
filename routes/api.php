@@ -7,8 +7,10 @@ use App\Http\Controllers\GraduateController;
 use App\Http\Controllers\UndergradController;
 use App\Http\Controllers\CurriculumController;
 use App\Http\Controllers\SyllabusController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\FaqController;
 use Illuminate\Support\Facades\Route;
 
 // CSRF Cookie endpoint for SPA authentication
@@ -26,6 +28,13 @@ Route::prefix('auth')->group(function () {
     Route::get('/verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
         ->middleware(['signed'])
         ->name('verification.verify');
+    
+});
+
+// FAQ routes
+Route::prefix('faqs')->controller(FaqController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/chat', 'chat');
 });
 
 // Protected routes
@@ -36,6 +45,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::put('/change-password', [AuthController::class, 'changePassword']);
+    });
+
+    // Dashboard routes
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/', [DashboardController::class, 'index']);
+        Route::post('/clear-cache', [DashboardController::class, 'clearCache']);
     });
 
     // Resource routes for managing data
