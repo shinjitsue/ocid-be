@@ -84,21 +84,23 @@ class CollegeController extends Controller
 
         // Handle logo upload if present
         if ($request->hasFile('logo')) {
-            $fileInfo = $this->fileService->uploadFile(
+            $logoInfo = $this->fileService->uploadFile(
                 $request->file('logo'),
                 'public',
-                'logos/colleges'
+                'college-logos'
             );
 
-            $collegeData['logo_path'] = $fileInfo['path'];
-            $collegeData['logo_url'] = $fileInfo['url'];
-            $collegeData['logo_name'] = $fileInfo['name'];
-            $collegeData['logo_type'] = $fileInfo['mime_type'];
-            $collegeData['logo_size'] = $fileInfo['size'];
+            $collegeData = array_merge($collegeData, [
+                'logo_path' => $logoInfo['path'],
+                'logo_url' => $logoInfo['url'],
+                'logo_name' => $logoInfo['name'],
+                'logo_type' => $logoInfo['mime_type'],
+                'logo_size' => $logoInfo['size'],
+            ]);
         }
 
         $college = College::create($collegeData);
-        $college->load('campus');
+        $college->load('campus'); // Load campus relationship
 
         // Add computed fields for immediate response
         $college->undergraduate_programs_count = 0;
@@ -322,7 +324,7 @@ class CollegeController extends Controller
                     'dashboard_data_v6_quick',
                     'dashboard_summary_v2'
                 ];
-                
+
                 foreach ($keysToInvalidate as $key) {
                     Cache::forget($key);
                 }
