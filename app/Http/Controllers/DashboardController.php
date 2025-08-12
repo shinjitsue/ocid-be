@@ -12,7 +12,9 @@ use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Models\Form;
 
 class DashboardController extends Controller
 {
@@ -49,7 +51,7 @@ class DashboardController extends Controller
             return $this->successResponse($data, 'Dashboard data retrieved successfully');
             
         } catch (\Exception $e) {
-            \Log::error('Dashboard data fetch failed', [
+            Log::error('Dashboard data fetch failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -101,7 +103,7 @@ class DashboardController extends Controller
                     'undergraduate_programs_count' => (int)$college->undergraduate_programs_count,
                     'graduate_programs_count' => (int)$college->graduate_programs_count,
                     'programs' => (int)$college->undergraduate_programs_count + (int)$college->graduate_programs_count,
-                    'files' => 0 // Will be calculated if needed
+                    'files' => 0 
                 ];
             });
 
@@ -122,6 +124,7 @@ class DashboardController extends Controller
                 'undergradProgram.college:id,name,acronym',
                 'graduateProgram.college:id,name,acronym'
             ])->get(),
+            'forms' => Form::orderBy('form_number')->get(),
             'meta' => [
                 'cached_at' => now()->toISOString(),
                 'version' => 'v6',
@@ -139,10 +142,10 @@ class DashboardController extends Controller
                 // For non-Redis cache drivers, use simple caching without tags
                 return Cache::get($key);
             }
-        } catch (\Exception $e) {
-            \Log::warning('Cache retrieval failed', ['key' => $key, 'error' => $e->getMessage()]);
-            return null;
-        }
+         } catch (\Exception $e) {
+             Log::warning('Cache retrieval failed', ['key' => $key, 'error' => $e->getMessage()]);
+             return null;
+         }
     }
 
     private function cacheData(string $key, array $data): void
@@ -168,7 +171,7 @@ class DashboardController extends Controller
             Cache::put($key . '_quick', $quickData, $ttl * 2);
             
         } catch (\Exception $e) {
-            \Log::warning('Cache storage failed', ['key' => $key, 'error' => $e->getMessage()]);
+            Log::warning('Cache storage failed', ['key' => $key, 'error' => $e->getMessage()]);
         }
     }
 
@@ -234,7 +237,7 @@ class DashboardController extends Controller
             return $this->successResponse(null, 'Dashboard cache cleared successfully');
             
         } catch (\Exception $e) {
-            \Log::error('Cache clear failed', ['error' => $e->getMessage()]);
+            Log::error('Cache clear failed', ['error' => $e->getMessage()]);
             return $this->errorResponse('Failed to clear cache', 500);
         }
     }

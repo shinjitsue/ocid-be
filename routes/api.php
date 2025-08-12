@@ -72,8 +72,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('syllabus/{syllabus}/upload', [SyllabusController::class, 'uploadFile']);
     Route::delete('syllabus/{syllabus}/file', [SyllabusController::class, 'removeFile']);
 
-    // Form routes with file operations
-    Route::apiResource('forms', FormController::class);
+    // Form routes with file operations - Fixed routing
+    Route::get('forms', [FormController::class, 'index']);
+    Route::post('forms', [FormController::class, 'store']);
+    Route::get('forms/{form}', [FormController::class, 'show']);
+    Route::post('forms/{form}', [FormController::class, 'update'])->where('form', '[0-9]+'); // Handle _method=PUT
+    Route::put('forms/{form}', [FormController::class, 'update']); // Keep original PUT route
+    Route::delete('forms/{form}', [FormController::class, 'destroy']);
     Route::post('forms/{form}/upload', [FormController::class, 'uploadFile']);
     Route::delete('forms/{form}/file', [FormController::class, 'removeFile']);
 });

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class FileService
@@ -17,47 +18,126 @@ class FileService
      * @param string|null $filename Optional cust   om filename
      * @return array File information including path and url
      */
-    public function uploadFile(UploadedFile $file, string $disk, ?string $folder = null, ?string $filename = null): array
+    public function uploadFile(UploadedFile $file, string $directory = 'uploads', array $nameComponents = []): array
     {
-        // Generate a unique filename if not provided
-        if (!$filename) {
-            $extension = $file->getClientOriginalExtension();
-            $filename = Str::uuid() . '.' . $extension;
-        }
-
-        // Prepare the path where the file will be stored
-        $path = $folder ? "$folder/$filename" : $filename;
-
-        // Store the file on the specified disk
-        $storedPath = $file->storeAs('', $path, $disk);
-
-        // Get the URL using method if available, otherwise build manually
-        $storage = Storage::disk($disk);
-        if (method_exists($storage, 'url')) {
-            $url = $storage->url($storedPath);
+        // Generate custom filename only for forms directory and when components are provided
+        if ($directory === 'forms' && !empty($nameComponents)) {
+            $customName = $this->generateCustomFileName($file, $nameComponents);
         } else {
-            $url = config('app.url') . '/storage/' . $storedPath;
+            // Use UUID naming for all other uploads (logos, syllabus, curriculum, etc.)
+            $customName = Str::uuid() . '.' . $file->getClientOriginalExtension();
         }
 
+        // Store the file
+        $path = $file->storeAs($directory, $customName, 'public');
+        
         return [
-            'path' => $storedPath,
-            'url' => $url,
-            'name' => $filename,
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
+            'path' => $path,
+            'url' => asset('storage/' . $path),
+            'name' => $customName,
             'original_name' => $file->getClientOriginalName(),
+            'mime_type' => $file->getClientMimeType(),
+            'size' => $file->getSize(),
         ];
     }
 
-    /**
-     * Delete a file from storage
-     */
-    public function deleteFile(string $path, string $disk): bool
+    private function generateCustomFileName(UploadedFile $file, array $components): string
     {
-        if (Storage::disk($disk)->exists($path)) {
-            return Storage::disk($disk)->delete($path);
+        $parts = [];
+        
+        // Add form number (remove spaces and special chars except hyphens)
+        if (!empty($components['form_number'])) {
+            $parts[] = $this->sanitizeComponent($components['form_number']);
         }
+        
+        // Add revision (remove spaces, format as Rev.X)
+        if (!empty($components['revision'])) {
+            $revision = $this->sanitizeComponent($components['revision']);
+            // Ensure revision follows Rev.X format
+            if (!str_starts_with(strtolower($revision), 'rev')) {
+                $revision = 'Rev.' . $revision;
+            }
+            $parts[] = $revision;
+        }
+        
+        // Generate UUID for uniqueness
+        $uuid = Str::uuid();
+        $parts[] = $uuid;
+        
+        // Get file extension
+        $extension = $file->getClientOriginalExtension();
+        
+        // Join parts with hyphens and add extension
+        $filename = implode('-', $parts) . '.' . $extension;
+        
+        return $filename;
+    }
 
-        return false;
+    private function sanitizeComponent(string $component): string
+    {
+        // Remove spaces and convert to string suitable for filename
+        $sanitized = preg_replace('/\s+/', '', $component); // Remove all spaces
+        $sanitized = preg_replace('/[^a-zA-Z0-9\-\.]/', '', $sanitized); // Keep only alphanumeric, hyphens, and dots
+        
+        return $sanitized;
+    }
+
+    // Add a method specifically for form uploads (for clarity)
+    public function uploadFormFile(UploadedFile $file, array $formComponents): array
+    {
+        return $this->uploadFile($file, 'forms', $formComponents);
+    }
+
+    // Add methods for other specific uploads (maintains existing behavior)
+    public function uploadLogo(UploadedFile $file): array
+    {
+        return $this->uploadFile($file, 'logos');
+    }
+
+    public function uploadSyllabus(UploadedFile $file): array
+    {
+        return $this->uploadFile($file, 'syllabus');
+    }
+
+    public function uploadCurriculum(UploadedFile $file): array
+    {
+        return $this->uploadFile($file, 'curriculum');
+    }
+
+    public function deleteFile(string $path, string $directory = null): bool
+    {
+        try {
+            Log::info('Attempting to delete file', [
+                'path' => $path,
+                'full_path' => storage_path('app/public/' . $path),
+                'exists' => Storage::disk('public')->exists($path)
+            ]);
+            
+            // Check if file exists before attempting deletion
+            if (!Storage::disk('public')->exists($path)) {
+                Log::warning('File does not exist for deletion', ['path' => $path]);
+                return true; // Consider non-existent file as "successfully deleted"
+            }
+            
+            $result = Storage::disk('public')->delete($path);
+            
+            if ($result) {
+                Log::info('File deleted successfully', [
+                    'path' => $path,
+                    'still_exists' => Storage::disk('public')->exists($path)
+                ]);
+            } else {
+                Log::error('Storage::delete returned false', ['path' => $path]);
+            }
+            
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('File deletion failed with exception', [
+                'path' => $path,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
     }
 }
