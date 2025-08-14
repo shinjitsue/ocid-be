@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class CurriculumController extends Controller
 {
@@ -27,10 +28,33 @@ class CurriculumController extends Controller
      */
     public function index(): JsonResponse
     {
-        $curricula = Curriculum::with(['graduateProgram.college', 'undergradProgram.college'])->get();
-        return $this->successResponse($curricula, 'Curricula retrieved successfully');
-    }
+        try {
+            // Get all curriculum without loading relationships that might cause issues
+            $curricula = Curriculum::select([
+                'id', 
+                'program_id', 
+                'program_type', 
+                'file_path', 
+                'file_url', 
+                'file_name', 
+                'file_type', 
+                'file_size', 
+                'created_at',
+                'updated_at'
+            ])->get();
 
+            Log::info('Curricula fetched successfully', ['count' => $curricula->count()]);
+            
+            return $this->successResponse($curricula, 'Curricula retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('Error fetching curricula', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return $this->errorResponse('Failed to fetch curricula: ' . $e->getMessage(), 500);
+        }
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -84,17 +108,18 @@ class CurriculumController extends Controller
             'file' => 'sometimes|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
 
-        if ($request->has(['program_id', 'program_type'])) {
+        // Only validate program exists if both program_id and program_type are being updated
+        if ($request->has('program_id') && $request->has('program_type')) {
             $this->validateProgramExists($request->input('program_id'), $request->input('program_type'));
         }
 
-        $curriculumData = $request->only([ 'program_id', 'program_type']);
+        $curriculumData = $request->only(['program_id', 'program_type']);
 
         // Handle file upload if present
         if ($request->hasFile('file')) {
             // Delete old file if exists
-            if ($curriculum->getAttribute('file_path')) {
-                $this->fileService->deleteFile($curriculum->getAttribute('file_path'), 'curriculum');
+            if ($curriculum->file_path) {
+                $this->fileService->deleteFile($curriculum->file_path, 'curriculum');
             }
 
             $fileInfo = $this->fileService->uploadFile(
@@ -118,13 +143,21 @@ class CurriculumController extends Controller
      */
     public function destroy(Curriculum $curriculum): JsonResponse
     {
-        // Delete associated file if exists
-        if ($curriculum->getAttribute('file_path')) {
-            $this->fileService->deleteFile($curriculum->getAttribute('file_path'), 'curriculum');
-        }
+        try {
+            // Delete associated file if exists
+            if ($curriculum->file_path) {
+                $this->fileService->deleteFile($curriculum->file_path, 'curriculum');
+            }
 
-        $curriculum->delete();
-        return $this->successResponse(null, 'Curriculum deleted successfully');
+            $curriculum->delete();
+            return $this->successResponse(null, 'Curriculum deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Curriculum deletion failed', [
+                'curriculum_id' => $curriculum->id,
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Failed to delete curriculum: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -176,17 +209,16 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Validate that the program exists.
+     * Validate that the program exists
      */
     private function validateProgramExists($programId, $programType)
     {
         $model = $programType === 'graduate' ? \App\Models\Graduate::class : \App\Models\Undergrad::class;
 
-        if (!$model::find($programId)) {
-            $validator = Validator::make([], []);
-            $validator->errors()->add('program_id', 'The selected program does not exist.');
-
-            throw new ValidationException($validator);
+        if (!$model::where('id', $programId)->exists()) {
+            throw ValidationException::withMessages([
+                'program_id' => ["The selected {$programType} program does not exist."]
+            ]);
         }
     }
 }
