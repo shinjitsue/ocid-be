@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class SyllabusController extends Controller
 {
@@ -27,8 +28,32 @@ class SyllabusController extends Controller
      */
     public function index(): JsonResponse
     {
-        $syllabi = Syllabus::with(['graduateProgram.college', 'undergradProgram.college'])->get();
-        return $this->successResponse($syllabi, 'Syllabi retrieved successfully');
+        try {
+            // Get all syllabus without loading relationships that might cause issues
+            $syllabi = Syllabus::select([
+                'id', 
+                'program_id', 
+                'program_type', 
+                'file_path', 
+                'file_url', 
+                'file_name', 
+                'file_type', 
+                'file_size', 
+                'created_at',
+                'updated_at'
+            ])->get();
+
+            Log::info('Syllabi fetched successfully', ['count' => $syllabi->count()]);
+            
+            return $this->successResponse($syllabi, 'Syllabi retrieved successfully');
+        } catch (\Exception $e) {
+            Log::error('Error fetching syllabi', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return $this->errorResponse('Failed to fetch syllabi: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -85,17 +110,18 @@ class SyllabusController extends Controller
             'file' => 'sometimes|file|max:10240|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
 
-        if ($request->has(['program_id', 'program_type'])) {
+        // Only validate program exists if both program_id and program_type are being updated
+        if ($request->has('program_id') && $request->has('program_type')) {
             $this->validateProgramExists($request->input('program_id'), $request->input('program_type'));
         }
 
-        $syllabusData = $request->only([ 'program_id', 'program_type']);
+        $syllabusData = $request->only(['program_id', 'program_type']);
 
         // Handle file upload if present
         if ($request->hasFile('file')) {
             // Delete old file if exists
-            if ($syllabus->getAttribute('file_path')) {
-                $this->fileService->deleteFile($syllabus->getAttribute('file_path'), 'syllabus');
+            if ($syllabus->file_path) {
+                $this->fileService->deleteFile($syllabus->file_path, 'syllabus');
             }
 
             $fileInfo = $this->fileService->uploadFile(
@@ -119,15 +145,22 @@ class SyllabusController extends Controller
      */
     public function destroy(Syllabus $syllabus): JsonResponse
     {
-        // Delete associated file if exists
-        if ($syllabus->getAttribute('file_path')) {
-            $this->fileService->deleteFile($syllabus->getAttribute('file_path'), 'syllabus');
+        try {
+            // Delete associated file if exists
+            if ($syllabus->file_path) {
+                $this->fileService->deleteFile($syllabus->file_path, 'syllabus');
+            }
+
+            $syllabus->delete();
+            return $this->successResponse(null, 'Syllabus deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Syllabus deletion failed', [
+                'syllabus_id' => $syllabus->id,
+                'error' => $e->getMessage()
+            ]);
+            return $this->errorResponse('Failed to delete syllabus: ' . $e->getMessage(), 500);
         }
-
-        $syllabus->delete();
-        return $this->successResponse(null, 'Syllabus deleted successfully');
     }
-
     /**
      * Upload a file for an existing syllabus
      */
@@ -183,11 +216,10 @@ class SyllabusController extends Controller
     {
         $model = $programType === 'graduate' ? \App\Models\Graduate::class : \App\Models\Undergrad::class;
 
-        if (!$model::find($programId)) {
-            $validator = Validator::make([], []);
-            $validator->errors()->add('program_id', 'The selected program does not exist.');
-
-            throw new ValidationException($validator);
+        if (!$model::where('id', $programId)->exists()) {
+            throw ValidationException::withMessages([
+                'program_id' => ["The selected {$programType} program does not exist."]
+            ]);
         }
     }
 }

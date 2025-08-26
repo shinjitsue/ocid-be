@@ -22,12 +22,22 @@ class Curriculum extends Model
     public function graduateProgram(): BelongsTo
     {
         return $this->belongsTo(Graduate::class, 'program_id')
-            ->when($this->getAttribute('program_type') === 'graduate');
+            ->where('curriculum.program_type', 'graduate');
     }
 
     public function undergradProgram(): BelongsTo
     {
         return $this->belongsTo(Undergrad::class, 'program_id')
-            ->when($this->getAttribute('program_type') === 'undergrad');
+            ->where('curriculum.program_type', 'undergrad');
+    }
+
+    // Add a polymorphic-like accessor
+    public function getProgram()
+    {
+        if ($this->program_type === 'graduate') {
+            return $this->graduateProgram;
+        } else {
+            return $this->undergradProgram;
+        }
     }
 }

@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.4
--- Dumped by pg_dump version 14.4
+-- Dumped from database version 16.9
+-- Dumped by pg_dump version 16.9
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -21,7 +21,7 @@ DROP DATABASE IF EXISTS ocid_be;
 -- Name: ocid_be; Type: DATABASE; Schema: -; Owner: postgres
 --
 
-CREATE DATABASE ocid_be WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'English_Philippines.1252';
+CREATE DATABASE ocid_be WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVIDER = libc LOCALE = 'en_US.UTF-8';
 
 
 ALTER DATABASE ocid_be OWNER TO postgres;
@@ -78,7 +78,8 @@ CREATE TABLE public.campuses (
     name character varying(255) NOT NULL,
     address character varying(255) NOT NULL,
     created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    updated_at timestamp(0) without time zone,
+    acronym character varying(10)
 );
 
 
@@ -96,7 +97,7 @@ CREATE SEQUENCE public.campuses_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.campuses_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.campuses_id_seq OWNER TO postgres;
 
 --
 -- Name: campuses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -114,7 +115,13 @@ CREATE TABLE public.colleges (
     name character varying(255) NOT NULL,
     campus_id bigint NOT NULL,
     created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    updated_at timestamp(0) without time zone,
+    acronym character varying(10),
+    logo_path character varying(255),
+    logo_url character varying(255),
+    logo_name character varying(255),
+    logo_type character varying(255),
+    logo_size integer
 );
 
 
@@ -132,7 +139,7 @@ CREATE SEQUENCE public.colleges_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.colleges_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.colleges_id_seq OWNER TO postgres;
 
 --
 -- Name: colleges_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -156,7 +163,7 @@ CREATE TABLE public.curriculum (
     file_size bigint,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT curriculum_program_type_check CHECK (((program_type)::text = ANY ((ARRAY['graduate'::character varying, 'undergrad'::character varying])::text[])))
+    CONSTRAINT curriculum_program_type_check CHECK (((program_type)::text = ANY (ARRAY[('graduate'::character varying)::text, ('undergrad'::character varying)::text])))
 );
 
 
@@ -174,7 +181,7 @@ CREATE SEQUENCE public.curriculum_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.curriculum_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.curriculum_id_seq OWNER TO postgres;
 
 --
 -- Name: curriculum_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -212,13 +219,49 @@ CREATE SEQUENCE public.failed_jobs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.failed_jobs_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.failed_jobs_id_seq OWNER TO postgres;
 
 --
 -- Name: failed_jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
 ALTER SEQUENCE public.failed_jobs_id_seq OWNED BY public.failed_jobs.id;
+
+
+--
+-- Name: faqs; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.faqs (
+    id bigint NOT NULL,
+    question character varying(255) NOT NULL,
+    answer text NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+
+ALTER TABLE public.faqs OWNER TO postgres;
+
+--
+-- Name: faqs_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.faqs_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.faqs_id_seq OWNER TO postgres;
+
+--
+-- Name: faqs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.faqs_id_seq OWNED BY public.faqs.id;
 
 
 --
@@ -256,7 +299,7 @@ CREATE SEQUENCE public.forms_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.forms_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.forms_id_seq OWNER TO postgres;
 
 --
 -- Name: forms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -274,7 +317,8 @@ CREATE TABLE public.graduates (
     program_name character varying(255) NOT NULL,
     college_id bigint NOT NULL,
     created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    updated_at timestamp(0) without time zone,
+    acronym character varying(10)
 );
 
 
@@ -292,7 +336,7 @@ CREATE SEQUENCE public.graduates_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.graduates_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.graduates_id_seq OWNER TO postgres;
 
 --
 -- Name: graduates_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -350,7 +394,7 @@ CREATE SEQUENCE public.jobs_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.jobs_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.jobs_id_seq OWNER TO postgres;
 
 --
 -- Name: jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -385,7 +429,7 @@ CREATE SEQUENCE public.migrations_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.migrations_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.migrations_id_seq OWNER TO postgres;
 
 --
 -- Name: migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -439,7 +483,7 @@ CREATE SEQUENCE public.personal_access_tokens_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.personal_access_tokens_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.personal_access_tokens_id_seq OWNER TO postgres;
 
 --
 -- Name: personal_access_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -479,7 +523,7 @@ CREATE TABLE public.syllabus (
     file_size bigint,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT syllabus_program_type_check CHECK (((program_type)::text = ANY ((ARRAY['graduate'::character varying, 'undergrad'::character varying])::text[])))
+    CONSTRAINT syllabus_program_type_check CHECK (((program_type)::text = ANY (ARRAY[('graduate'::character varying)::text, ('undergrad'::character varying)::text])))
 );
 
 
@@ -497,7 +541,7 @@ CREATE SEQUENCE public.syllabus_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.syllabus_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.syllabus_id_seq OWNER TO postgres;
 
 --
 -- Name: syllabus_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -515,7 +559,8 @@ CREATE TABLE public.undergrads (
     program_name character varying(255) NOT NULL,
     college_id bigint NOT NULL,
     created_at timestamp(0) without time zone,
-    updated_at timestamp(0) without time zone
+    updated_at timestamp(0) without time zone,
+    acronym character varying(10)
 );
 
 
@@ -533,7 +578,7 @@ CREATE SEQUENCE public.undergrads_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.undergrads_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.undergrads_id_seq OWNER TO postgres;
 
 --
 -- Name: undergrads_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -572,7 +617,7 @@ CREATE SEQUENCE public.user_activities_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.user_activities_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.user_activities_id_seq OWNER TO postgres;
 
 --
 -- Name: user_activities_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -617,7 +662,7 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 --
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
@@ -652,6 +697,13 @@ ALTER TABLE ONLY public.curriculum ALTER COLUMN id SET DEFAULT nextval('public.c
 --
 
 ALTER TABLE ONLY public.failed_jobs ALTER COLUMN id SET DEFAULT nextval('public.failed_jobs_id_seq'::regclass);
+
+
+--
+-- Name: faqs id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.faqs ALTER COLUMN id SET DEFAULT nextval('public.faqs_id_seq'::regclass);
 
 
 --
@@ -737,7 +789,9 @@ COPY public.cache_locks (key, owner, expiration) FROM stdin;
 -- Data for Name: campuses; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.campuses (id, name, address, created_at, updated_at) FROM stdin;
+COPY public.campuses (id, name, address, created_at, updated_at, acronym) FROM stdin;
+1	Caraga State University - Main Campus	Ampayon, Butuan City, Agusan del Norte, Philippines	2025-07-29 10:32:55	2025-07-29 10:32:55	CSU-MAIN
+2	Caraga State University - Cabadbaran Campus	Cabadbaran City, Agusan del Norte, Philippines	2025-07-29 10:32:55	2025-07-29 10:32:55	CSU-CC
 \.
 
 
@@ -745,7 +799,23 @@ COPY public.campuses (id, name, address, created_at, updated_at) FROM stdin;
 -- Data for Name: colleges; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.colleges (id, name, campus_id, created_at, updated_at) FROM stdin;
+COPY public.colleges (id, name, campus_id, created_at, updated_at, acronym, logo_path, logo_url, logo_name, logo_type, logo_size) FROM stdin;
+2	College of Engineering and Information Technology	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CEIT	\N	\N	\N	\N	\N
+3	College of Mathematics and Natural Sciences	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CMNS	\N	\N	\N	\N	\N
+4	College of Teacher Education	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CTE	\N	\N	\N	\N	\N
+5	College of Business and Management	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CBM	\N	\N	\N	\N	\N
+6	College of Arts and Social Sciences	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CASS	\N	\N	\N	\N	\N
+7	College of Agriculture and Natural Resources	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CANR	\N	\N	\N	\N	\N
+8	College of Forestry and Environmental Sciences	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CFES	\N	\N	\N	\N	\N
+9	College of Medicine	1	2025-07-29 10:57:39	2025-07-29 10:57:39	COM	\N	\N	\N	\N	\N
+10	College of Nursing	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CON	\N	\N	\N	\N	\N
+11	College of Public Administration and Governance	1	2025-07-29 10:57:39	2025-07-29 10:57:39	CPAG	\N	\N	\N	\N	\N
+12	Graduate School	1	2025-07-29 10:57:39	2025-07-29 10:57:39	GS	\N	\N	\N	\N	\N
+13	College of Teacher Education - Cabadbaran	2	2025-07-29 10:57:39	2025-07-29 10:57:39	CTE-CC	\N	\N	\N	\N	\N
+14	College of Business and Management - Cabadbaran	2	2025-07-29 10:57:39	2025-07-29 10:57:39	CBM-CC	\N	\N	\N	\N	\N
+15	College of Engineering and Information Technology - Cabadbaran	2	2025-07-29 10:57:39	2025-07-29 10:57:39	CEIT-CC	\N	\N	\N	\N	\N
+16	College of Arts and Social Sciences - Cabadbaran	2	2025-07-29 10:57:39	2025-07-29 10:57:39	CASS-CC	\N	\N	\N	\N	\N
+17	College of Agriculture and Natural Resources - Cabadbaran	2	2025-07-29 10:57:39	2025-07-29 10:57:39	CANR-CC	\N	\N	\N	\N	\N
 \.
 
 
@@ -766,6 +836,14 @@ COPY public.failed_jobs (id, uuid, connection, queue, payload, exception, failed
 
 
 --
+-- Data for Name: faqs; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.faqs (id, question, answer, created_at, updated_at) FROM stdin;
+\.
+
+
+--
 -- Data for Name: forms; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -777,7 +855,7 @@ COPY public.forms (id, form_number, title, purpose, link, revision, file_path, f
 -- Data for Name: graduates; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.graduates (id, program_name, college_id, created_at, updated_at) FROM stdin;
+COPY public.graduates (id, program_name, college_id, created_at, updated_at, acronym) FROM stdin;
 \.
 
 
@@ -815,6 +893,15 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 11	2025_07_08_064151_create_personal_access_tokens_table	1
 12	2025_07_08_073420_create_user_activities_table	1
 13	2025_07_09_041738_add_deleted_at_to_users_table	1
+14	2025_07_18_071350_add_acronym_to_colleges_table	2
+15	2025_07_18_081216_add_acronym_to_campuses_table	2
+16	2025_07_18_135943_add_logo_to_colleges_table	2
+17	2025_07_19_004207_add_acronym_to_graduates_table	2
+18	2025_07_19_004315_add_acronym_to_undergrads_table	2
+19	2025_07_21_023236_create_faqs_table	2
+20	2025_07_23_011424_add_performance_indexes_to_tables	2
+21	2025_07_23_022721_update_performance_indexes_to_tables	3
+22	2025_07_23_031101_add_optimized_performance_indexe	3
 \.
 
 
@@ -831,6 +918,7 @@ COPY public.password_reset_tokens (email, token, created_at) FROM stdin;
 --
 
 COPY public.personal_access_tokens (id, tokenable_type, tokenable_id, name, token, abilities, last_used_at, expires_at, created_at, updated_at) FROM stdin;
+3	App\\Models\\User	1	Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0	6d04ee3ed598de4d32a67105ab83abdd19c4cb6e62017d087c7339b599b42002	["*"]	2025-07-30 07:27:26	2025-07-31 03:05:57	2025-07-30 03:05:57	2025-07-30 07:27:26
 \.
 
 
@@ -854,7 +942,8 @@ COPY public.syllabus (id, program_id, program_type, file_path, file_url, file_na
 -- Data for Name: undergrads; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.undergrads (id, program_name, college_id, created_at, updated_at) FROM stdin;
+COPY public.undergrads (id, program_name, college_id, created_at, updated_at, acronym) FROM stdin;
+1	daskjdkashjkdahskjdha	2	2025-07-30 01:14:20	2025-07-30 01:14:20	CSJS
 \.
 
 
@@ -863,6 +952,10 @@ COPY public.undergrads (id, program_name, college_id, created_at, updated_at) FR
 --
 
 COPY public.user_activities (id, user_id, activity_type, ip_address, user_agent, metadata, created_at, updated_at) FROM stdin;
+1	1	register	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-29T09:46:47.152442Z"}	2025-07-29 09:46:47	2025-07-29 09:46:47
+2	1	login	127.0.0.1	Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0	{"remember_me":false,"timestamp":"2025-07-29T09:56:24.904945Z"}	2025-07-29 09:56:24	2025-07-29 09:56:24
+3	1	logout	127.0.0.1	Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0	{"timestamp":"2025-07-30T02:58:50.422133Z"}	2025-07-30 02:58:50	2025-07-30 02:58:50
+4	1	login	127.0.0.1	Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0	{"remember_me":false,"timestamp":"2025-07-30T03:05:57.933790Z"}	2025-07-30 03:05:57	2025-07-30 03:05:57
 \.
 
 
@@ -871,6 +964,7 @@ COPY public.user_activities (id, user_id, activity_type, ip_address, user_agent,
 --
 
 COPY public.users (id, name, email, email_verified_at, password, avatar, is_active, last_login_at, last_login_ip, preferences, remember_token, created_at, updated_at, deleted_at) FROM stdin;
+1	Ren Doe	sample.doe@example.com	\N	$2y$12$UHmohB5X4/UHbmwlqSMld.nmjdV.FvaI97m5KARlhYgfARRm1CWB.	\N	t	\N	\N	\N	\N	2025-07-29 09:46:46	2025-07-29 09:46:46	\N
 \.
 
 
@@ -878,14 +972,14 @@ COPY public.users (id, name, email, email_verified_at, password, avatar, is_acti
 -- Name: campuses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.campuses_id_seq', 1, false);
+SELECT pg_catalog.setval('public.campuses_id_seq', 2, true);
 
 
 --
 -- Name: colleges_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.colleges_id_seq', 1, false);
+SELECT pg_catalog.setval('public.colleges_id_seq', 21, true);
 
 
 --
@@ -900,6 +994,13 @@ SELECT pg_catalog.setval('public.curriculum_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.failed_jobs_id_seq', 1, false);
+
+
+--
+-- Name: faqs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.faqs_id_seq', 1, false);
 
 
 --
@@ -927,14 +1028,14 @@ SELECT pg_catalog.setval('public.jobs_id_seq', 1, false);
 -- Name: migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.migrations_id_seq', 13, true);
+SELECT pg_catalog.setval('public.migrations_id_seq', 22, true);
 
 
 --
 -- Name: personal_access_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.personal_access_tokens_id_seq', 1, false);
+SELECT pg_catalog.setval('public.personal_access_tokens_id_seq', 3, true);
 
 
 --
@@ -948,21 +1049,21 @@ SELECT pg_catalog.setval('public.syllabus_id_seq', 1, false);
 -- Name: undergrads_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.undergrads_id_seq', 1, false);
+SELECT pg_catalog.setval('public.undergrads_id_seq', 1, true);
 
 
 --
 -- Name: user_activities_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.user_activities_id_seq', 1, false);
+SELECT pg_catalog.setval('public.user_activities_id_seq', 4, true);
 
 
 --
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 1, false);
+SELECT pg_catalog.setval('public.users_id_seq', 1, true);
 
 
 --
@@ -1019,6 +1120,14 @@ ALTER TABLE ONLY public.failed_jobs
 
 ALTER TABLE ONLY public.failed_jobs
     ADD CONSTRAINT failed_jobs_uuid_unique UNIQUE (uuid);
+
+
+--
+-- Name: faqs faqs_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.faqs
+    ADD CONSTRAINT faqs_pkey PRIMARY KEY (id);
 
 
 --
@@ -1134,6 +1243,174 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: campuses_acronym_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX campuses_acronym_index ON public.campuses USING btree (acronym);
+
+
+--
+-- Name: colleges_acronym_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX colleges_acronym_index ON public.colleges USING btree (acronym);
+
+
+--
+-- Name: graduates_acronym_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX graduates_acronym_index ON public.graduates USING btree (acronym);
+
+
+--
+-- Name: idx_colleges_acronym_campus; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_colleges_acronym_campus ON public.colleges USING btree (acronym, campus_id);
+
+
+--
+-- Name: idx_colleges_covering; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_colleges_covering ON public.colleges USING btree (id, name, acronym, campus_id, logo_url, created_at);
+
+
+--
+-- Name: idx_colleges_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_colleges_name ON public.colleges USING btree (name);
+
+
+--
+-- Name: idx_curriculum_file_type; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_curriculum_file_type ON public.curriculum USING btree (file_type);
+
+
+--
+-- Name: idx_curriculum_graduate; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_curriculum_graduate ON public.curriculum USING btree (program_id, created_at) WHERE ((program_type)::text = 'graduate'::text);
+
+
+--
+-- Name: idx_curriculum_program_full; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_curriculum_program_full ON public.curriculum USING btree (program_id, program_type, created_at);
+
+
+--
+-- Name: idx_curriculum_type_created; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_curriculum_type_created ON public.curriculum USING btree (program_type, created_at);
+
+
+--
+-- Name: idx_curriculum_type_program; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_curriculum_type_program ON public.curriculum USING btree (program_type, program_id);
+
+
+--
+-- Name: idx_curriculum_undergrad; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_curriculum_undergrad ON public.curriculum USING btree (program_id, created_at) WHERE ((program_type)::text = 'undergrad'::text);
+
+
+--
+-- Name: idx_graduates_acronym; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_graduates_acronym ON public.graduates USING btree (acronym);
+
+
+--
+-- Name: idx_graduates_covering; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_graduates_covering ON public.graduates USING btree (id, program_name, acronym, college_id, created_at);
+
+
+--
+-- Name: idx_graduates_program_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_graduates_program_name ON public.graduates USING btree (program_name);
+
+
+--
+-- Name: idx_syllabus_file_type; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_syllabus_file_type ON public.syllabus USING btree (file_type);
+
+
+--
+-- Name: idx_syllabus_graduate; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_syllabus_graduate ON public.syllabus USING btree (program_id, created_at) WHERE ((program_type)::text = 'graduate'::text);
+
+
+--
+-- Name: idx_syllabus_program_full; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_syllabus_program_full ON public.syllabus USING btree (program_id, program_type, created_at);
+
+
+--
+-- Name: idx_syllabus_type_created; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_syllabus_type_created ON public.syllabus USING btree (program_type, created_at);
+
+
+--
+-- Name: idx_syllabus_type_program; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_syllabus_type_program ON public.syllabus USING btree (program_type, program_id);
+
+
+--
+-- Name: idx_syllabus_undergrad; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_syllabus_undergrad ON public.syllabus USING btree (program_id, created_at) WHERE ((program_type)::text = 'undergrad'::text);
+
+
+--
+-- Name: idx_undergrads_acronym; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_undergrads_acronym ON public.undergrads USING btree (acronym);
+
+
+--
+-- Name: idx_undergrads_covering; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_undergrads_covering ON public.undergrads USING btree (id, program_name, acronym, college_id, created_at);
+
+
+--
+-- Name: idx_undergrads_program_name; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_undergrads_program_name ON public.undergrads USING btree (program_name);
+
+
+--
 -- Name: jobs_queue_index; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -1159,6 +1436,13 @@ CREATE INDEX sessions_last_activity_index ON public.sessions USING btree (last_a
 --
 
 CREATE INDEX sessions_user_id_index ON public.sessions USING btree (user_id);
+
+
+--
+-- Name: undergrads_acronym_index; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX undergrads_acronym_index ON public.undergrads USING btree (acronym);
 
 
 --
