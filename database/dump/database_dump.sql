@@ -2,12 +2,15 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.9
--- Dumped by pg_dump version 16.9
+\restrict 282GlI9pGBW7VdkNPaAaqfzhmbxOH7hUzuhxcvbHEzl6IPzMjxbow9M9S56rrtU
+
+-- Dumped from database version 17.6 (Debian 17.6-1)
+-- Dumped by pg_dump version 18.0 (Debian 18.0-1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -26,11 +29,14 @@ CREATE DATABASE ocid_be WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE_PROVI
 
 ALTER DATABASE ocid_be OWNER TO postgres;
 
+\unrestrict 282GlI9pGBW7VdkNPaAaqfzhmbxOH7hUzuhxcvbHEzl6IPzMjxbow9M9S56rrtU
 \connect ocid_be
+\restrict 282GlI9pGBW7VdkNPaAaqfzhmbxOH7hUzuhxcvbHEzl6IPzMjxbow9M9S56rrtU
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -163,7 +169,7 @@ CREATE TABLE public.curriculum (
     file_size bigint,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT curriculum_program_type_check CHECK (((program_type)::text = ANY (ARRAY[('graduate'::character varying)::text, ('undergrad'::character varying)::text])))
+    CONSTRAINT curriculum_program_type_check CHECK (((program_type)::text = ANY ((ARRAY['graduate'::character varying, 'undergrad'::character varying])::text[])))
 );
 
 
@@ -273,7 +279,7 @@ CREATE TABLE public.forms (
     form_number character varying(255) NOT NULL,
     title character varying(255) NOT NULL,
     purpose text NOT NULL,
-    link character varying(255),
+    link text,
     revision character varying(255),
     file_path character varying(255),
     file_url character varying(255),
@@ -523,7 +529,7 @@ CREATE TABLE public.syllabus (
     file_size bigint,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone,
-    CONSTRAINT syllabus_program_type_check CHECK (((program_type)::text = ANY (ARRAY[('graduate'::character varying)::text, ('undergrad'::character varying)::text])))
+    CONSTRAINT syllabus_program_type_check CHECK (((program_type)::text = ANY ((ARRAY['graduate'::character varying, 'undergrad'::character varying])::text[])))
 );
 
 
@@ -893,15 +899,16 @@ COPY public.migrations (id, migration, batch) FROM stdin;
 11	2025_07_08_064151_create_personal_access_tokens_table	1
 12	2025_07_08_073420_create_user_activities_table	1
 13	2025_07_09_041738_add_deleted_at_to_users_table	1
-14	2025_07_18_071350_add_acronym_to_colleges_table	2
-15	2025_07_18_081216_add_acronym_to_campuses_table	2
-16	2025_07_18_135943_add_logo_to_colleges_table	2
-17	2025_07_19_004207_add_acronym_to_graduates_table	2
-18	2025_07_19_004315_add_acronym_to_undergrads_table	2
-19	2025_07_21_023236_create_faqs_table	2
-20	2025_07_23_011424_add_performance_indexes_to_tables	2
-21	2025_07_23_022721_update_performance_indexes_to_tables	3
-22	2025_07_23_031101_add_optimized_performance_indexe	3
+14	2025_07_18_071350_add_acronym_to_colleges_table	1
+15	2025_07_18_081216_add_acronym_to_campuses_table	1
+16	2025_07_18_135943_add_logo_to_colleges_table	1
+17	2025_07_19_004207_add_acronym_to_graduates_table	1
+18	2025_07_19_004315_add_acronym_to_undergrads_table	1
+19	2025_07_21_023236_create_faqs_table	1
+20	2025_07_23_011424_add_performance_indexes_to_tables	1
+21	2025_07_23_022721_update_performance_indexes_to_tables	1
+22	2025_07_23_031101_add_optimized_performance_indexe	1
+23	2025_08_11_140731_update_forms_link_column_to_text	1
 \.
 
 
@@ -952,10 +959,6 @@ COPY public.undergrads (id, program_name, college_id, created_at, updated_at, ac
 --
 
 COPY public.user_activities (id, user_id, activity_type, ip_address, user_agent, metadata, created_at, updated_at) FROM stdin;
-1	1	register	127.0.0.1	PostmanRuntime/7.44.1	{"timestamp":"2025-07-29T09:46:47.152442Z"}	2025-07-29 09:46:47	2025-07-29 09:46:47
-2	1	login	127.0.0.1	Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0	{"remember_me":false,"timestamp":"2025-07-29T09:56:24.904945Z"}	2025-07-29 09:56:24	2025-07-29 09:56:24
-3	1	logout	127.0.0.1	Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0	{"timestamp":"2025-07-30T02:58:50.422133Z"}	2025-07-30 02:58:50	2025-07-30 02:58:50
-4	1	login	127.0.0.1	Mozilla/5.0 (X11; Linux x86_64; rv:141.0) Gecko/20100101 Firefox/141.0	{"remember_me":false,"timestamp":"2025-07-30T03:05:57.933790Z"}	2025-07-30 03:05:57	2025-07-30 03:05:57
 \.
 
 
@@ -1501,4 +1504,6 @@ ALTER TABLE ONLY public.user_activities
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict 282GlI9pGBW7VdkNPaAaqfzhmbxOH7hUzuhxcvbHEzl6IPzMjxbow9M9S56rrtU
 
